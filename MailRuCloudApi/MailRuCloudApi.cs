@@ -90,7 +90,7 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Copy(Folder folder, Folder destinationFolder)
         {
-            return await this.Copy(folder, destinationFolder.FulPath);
+            return await this.Copy(folder, destinationFolder.FullPath);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Copy(Folder folder, string destinationPath)
         {
-            return !string.IsNullOrEmpty(await this.MoveOrCopy(folder.Name, folder.FulPath, destinationPath, false));
+            return !string.IsNullOrEmpty(await this.MoveOrCopy(folder.Name, folder.FullPath, destinationPath, false));
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Copy(File file, Folder destinationFolder)
         {
-            return await this.Copy(file, destinationFolder.FulPath);
+            return await this.Copy(file, destinationFolder.FullPath);
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Rename(Folder folder, string newFileName)
         {
-            return await this.Rename(folder.Name, folder.FulPath, newFileName);
+            return await this.Rename(folder.Name, folder.FullPath, newFileName);
         }
 
         /// <summary>
@@ -218,7 +218,7 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Move(Folder folder, Folder destinationFolder)
         {
-            return await this.Move(folder, destinationFolder.FulPath);
+            return await this.Move(folder, destinationFolder.FullPath);
         }
 
         /// <summary>
@@ -240,7 +240,7 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Move(Folder folder, string destinationPath)
         {
-            return !string.IsNullOrEmpty(await this.MoveOrCopy(folder.Name, folder.FulPath, destinationPath, true));
+            return !string.IsNullOrEmpty(await this.MoveOrCopy(folder.Name, folder.FullPath, destinationPath, true));
         }
 
         /// <summary>
@@ -262,7 +262,7 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Move(File file, Folder destinationFolder)
         {
-            return await this.Move(file, destinationFolder.FulPath);
+            return await this.Move(file, destinationFolder.FullPath);
         }
 
         /// <summary>
@@ -294,16 +294,19 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> CreateFolder(string name, string createIn)
         {
-            return await AddFileInCloud(new File
-            {
-                Name = name,
-                FullPath = createIn.EndsWith("/") ? createIn + name : createIn + "/" + name,
-                Hash = null,
-                Size = new FileSize
-                {
-                    DefaultValue = 0
-                }
-            });
+            return
+                await
+                    AddFileInCloud(new File(createIn.EndsWith("/") ? createIn + name : createIn + "/" + name, 0,
+                        FileType.SingleFile, null));
+            //{
+            //    //Name = name,
+            //    FullPath = createIn.EndsWith("/") ? createIn + name : createIn + "/" + name,
+            //    Hash = null,
+            //    Size = new FileSize
+            //    {
+            //        DefaultValue = 0
+            //    }
+            //});
         }
 
         /// <summary>
@@ -342,7 +345,7 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Remove(Folder folder)
         {
-            return await this.Remove(folder.FulPath);
+            return await this.Remove(folder.FullPath);
         }
 
         /// <summary>
@@ -416,7 +419,7 @@ namespace MailRuCloudApi
         /// <returns>True or false result of the operation.</returns>
         public async Task<bool> UnpublishLink(Folder folder)
         {
-            return (await this.PublishUnpulishLink(folder.Name, folder.FulPath, false, folder.PublicLink)).ToUpper() == folder.FulPath.ToUpper();
+            return (await this.PublishUnpulishLink(folder.Name, folder.FullPath, false, folder.PublicLink)).ToUpper() == folder.FullPath.ToUpper();
         }
 
         /// <summary>
@@ -441,7 +444,7 @@ namespace MailRuCloudApi
         /// <returns>Public folder link.</returns>
         public async Task<string> GetPublishLink(Folder folder)
         {
-            return await this.PublishUnpulishLink(folder.Name, folder.FulPath, true, null);
+            return await this.PublishUnpulishLink(folder.Name, folder.FullPath, true, null);
         }
 
         /// <summary>
@@ -451,7 +454,7 @@ namespace MailRuCloudApi
         /// <returns>List of the items.</returns>
         public async Task<Entry> GetItems(Folder folder)
         {
-            return await this.GetItems(folder.FulPath);
+            return await this.GetItems(folder.FullPath);
         }
 
         /// <summary>
@@ -509,17 +512,17 @@ namespace MailRuCloudApi
                     var fileBytes = await this.GetFile(file);
                     var conf = this.DeserializeMultiFileConfig(Encoding.UTF8.GetString(fileBytes));
 
-                    tempFiles.Add(new File()
-                    {
-                        Name = conf.OriginalFileName,
-                        Size = new FileSize()
-                        {
-                            DefaultValue = conf.Size
-                        },
-                        FullPath = file.FullPath,
-                        Type = FileType.MultiFile,
-                        PrimaryName = file.PrimaryName
-                    });
+                    tempFiles.Add(new File(file.FullPath, conf.Size, FileType.MultiFile, null));
+                    //{
+                    //    //Name = conf.OriginalFileName,
+                    //    Size = new FileSize()
+                    //    {
+                    //        DefaultValue = conf.Size
+                    //    },
+                    //    FullPath = file.FullPath,
+                    //    Type = FileType.MultiFile,
+                    //    PrimaryName = file.PrimaryName
+                    //});
 
                     multiFileParts.AddRange(conf.Parts);
                 }
@@ -640,7 +643,7 @@ namespace MailRuCloudApi
             this.CheckAuth();
             var shard = this.GetShardInfo(ShardType.Upload).Result;
 
-            var res = new MailRuCloudStream(destinationPath, shard, Account, cancelToken, size);
+            var res = new MailRuCloudStream(fileName, destinationPath, shard, Account, cancelToken, size);
 
             return res;
         }
@@ -777,10 +780,7 @@ namespace MailRuCloudApi
                 {
                     token.ThrowIfCancellationRequested();
 
-                    if (outputStream != null)
-                    {
-                        outputStream.Write(fileBytes, totalBytesRead, bytesRead);
-                    }
+                    outputStream?.Write(fileBytes, totalBytesRead, bytesRead);
 
                     totalBytesRead += bytesRead;
 
@@ -914,16 +914,19 @@ namespace MailRuCloudApi
                                     var hashResult = resp[0];
                                     var sizeResult = long.Parse(resp[1].Replace("\r\n", string.Empty));
 
-                                    return this.AddFileInCloud(new File()
-                                    {
-                                        Name = fileName,
-                                        FullPath = HttpUtility.UrlDecode(destinationPath) + fileName,
-                                        Hash = hashResult,
-                                        Size = new FileSize()
-                                        {
-                                            DefaultValue = sizeResult
-                                        }
-                                    }).Result;
+
+                                    var f = new File(HttpUtility.UrlDecode(destinationPath) + fileName, sizeResult, FileType.SingleFile, hashResult);
+                                    return AddFileInCloud(f).Result;
+                                    //return this.AddFileInCloud(new File()
+                                    //{
+                                    //    //Name = fileName,
+                                    //    FullPath = HttpUtility.UrlDecode(destinationPath) + fileName,
+                                    //    Hash = hashResult,
+                                    //    Size = new FileSize()
+                                    //    {
+                                    //        DefaultValue = sizeResult
+                                    //    }
+                                    //}).Result;
                                 }
                             }
                         }
@@ -1261,12 +1264,15 @@ namespace MailRuCloudApi
                     var newConfName = this.MoveOrCopy(fileInfo.PrimaryName, fileInfo.FullPath, destPath, needMove).Result;
                     if (result = newConfName != fileInfo.PrimaryName)
                     {
-                        result = this.Remove(new File()
-                        {
-                            Name = newConfName,
-                            FullPath = destPath.EndsWith("/") ? destPath + newConfName : destPath + "/" + newConfName,
-                            Type = FileType.SingleFile
-                        }).Result;
+
+                        var f = new File(destPath.EndsWith("/") ? destPath + newConfName : destPath + "/" + newConfName, 0, FileType.SingleFile, null);
+                        result = Remove(f).Result;
+                        //result = this.Remove(new File()
+                        //{
+                        //    //Name = newConfName,
+                        //    FullPath = destPath.EndsWith("/") ? destPath + newConfName : destPath + "/" + newConfName,
+                        //    Type = FileType.SingleFile
+                        //}).Result;
 
                         if (result)
                         {

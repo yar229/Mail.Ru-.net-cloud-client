@@ -114,30 +114,31 @@ namespace MailRuCloudApi
                                 {
                                     DefaultValue = size
                                 },
-                                FulPath = path,
-                                Name = name,
+                                FullPath = path,
+                                //Name = name,
                                 PublicLink = weblink
                             });
                         }
                         else if (type == "file")
                         {
-                            files.Add(new File()
-                            {
-                                Size = new FileSize()
-                                {
-                                    DefaultValue = size
-                                },
-                                FullPath = path,
-                                Name = name,
-                                Hash = (string)item["hash"],
-                                PublicLink = weblink,
-                                Type = FileType.SingleFile,
-                                PrimaryName = name,
-                                PrimarySize = new FileSize()
-                                {
-                                    DefaultValue = size
-                                }
-                            });
+                            var f = new File(path, size, FileType.SingleFile, (string)item["hash"]);
+                            files.Add(f);
+                            //{
+                            //    Size = new FileSize()
+                            //    {
+                            //        DefaultValue = size
+                            //    },
+                            //    FullPath = path,
+                            //    //Name = name,
+                            //    Hash = (string)item["hash"],
+                            //    PublicLink = weblink,
+                            //    Type = FileType.SingleFile,
+                            //    PrimaryName = name,
+                            //    PrimarySize = new FileSize()
+                            //    {
+                            //        DefaultValue = size
+                            //    }
+                            //});
                         }
                     }
 

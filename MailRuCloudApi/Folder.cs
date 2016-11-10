@@ -5,6 +5,9 @@
 // <author>Korolev Erast.</author>
 //-----------------------------------------------------------------------
 
+using System;
+using System.IO;
+
 namespace MailRuCloudApi
 {
     /// <summary>
@@ -28,13 +31,13 @@ namespace MailRuCloudApi
         /// <param name="size">Folder size.</param>
         /// <param name="fullPath">Full folder path.</param>
         /// <param name="publicLink">Public folder link.</param>
-        public Folder(int foldersCount, int filesCount, string name, FileSize size, string fullPath, string publicLink = null)
+        public Folder(int foldersCount, int filesCount, /*string name,*/ FileSize size, string fullPath, string publicLink = null)
         {
             this.NumberOfFolders = foldersCount;
             this.NumberOfFiles = filesCount;
-            this.Name = name;
+            //this.Name = name;
             this.Size = size;
-            this.FulPath = fullPath;
+            this.FullPath = fullPath;
             this.PublicLink = publicLink;
         }
 
@@ -54,7 +57,14 @@ namespace MailRuCloudApi
         /// Gets folder name.
         /// </summary>
         /// <value>Folder name.</value>
-        public string Name { get; set; }
+        public string Name
+        {
+            get
+            {
+                if (FullPath == "/") return "";
+                return FullPath.TrimEnd('/').Remove(0, FullPath.LastIndexOf('/') + 1);
+            }
+        }
 
         /// <summary>
         /// Gets folder size.
@@ -66,12 +76,52 @@ namespace MailRuCloudApi
         /// Gets full folder path on the server.
         /// </summary>
         /// <value>Full folder path.</value>
-        public string FulPath { get; set; }
+        public string FullPath
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets public folder link.
         /// </summary>
         /// <value>Public link.</value>
         public string PublicLink { get; internal set; }
+
+        public DateTime CreationTimeUtc
+        {
+            get
+            {
+                return DateTime.Now.AddDays(-1);
+            }
+            set { }
+        }
+
+        public DateTime LastWriteTimeUtc
+        {
+            get
+            {
+                return DateTime.Now.AddDays(-1);
+            }
+            set { }
+        }
+
+        public DateTime LastAccessTimeUtc
+        {
+            get
+            {
+                return DateTime.Now.AddDays(-1);
+            }
+            set { }
+        }
+
+        public FileAttributes Attributes
+        {
+            get
+            {
+                return FileAttributes.Directory;
+            }
+            set { }
+        }
     }
 }

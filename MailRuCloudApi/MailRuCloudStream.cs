@@ -18,7 +18,7 @@ namespace MailRuCloudApi
 
         private readonly File _file;
 
-        public MailRuCloudStream(string fileName, string destinationPath, ShardInfo shard, Account account, CancellationTokenSource cancelToken, long size)
+        public MailRuCloudStream(string destinationPath, ShardInfo shard, Account account, CancellationTokenSource cancelToken, long size)
         {
             _file = new File
             {
@@ -270,7 +270,7 @@ namespace MailRuCloudApi
             if (!Enum.IsDefined(typeof (OperationType), operation))
                 throw new ArgumentOutOfRangeException(nameof(operation));
 
-            if (outputStream != null && (contentLength != 0 && outputStream.Position == 0))
+            if (outputStream != null && contentLength != 0 && outputStream.Position == 0)
             {
                 //this.OnChangedProgressPercent(new ProgressChangedEventArgs(
                 //                0,

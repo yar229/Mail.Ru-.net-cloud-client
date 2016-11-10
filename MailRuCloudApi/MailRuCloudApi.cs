@@ -640,7 +640,7 @@ namespace MailRuCloudApi
             this.CheckAuth();
             var shard = this.GetShardInfo(ShardType.Upload).Result;
 
-            var res = new MailRuCloudStream(fileName, destinationPath, shard, Account, cancelToken, size);
+            var res = new MailRuCloudStream(destinationPath, shard, Account, cancelToken, size);
 
             return res;
         }

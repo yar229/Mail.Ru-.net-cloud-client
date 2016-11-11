@@ -470,23 +470,23 @@ namespace MailRuCloudApi
                 path = "/";
             }
 
-            var uri = new Uri(string.Format("{0}/api/v2/folder?token={1}&home={2}", ConstSettings.CloudDomain, this.Account.AuthToken, HttpUtility.UrlEncode(path)));
+            var uri = new Uri($"{ConstSettings.CloudDomain}/api/v2/folder?token={this.Account.AuthToken}&home={HttpUtility.UrlEncode(path)}");
             var request = (HttpWebRequest)WebRequest.Create(uri.OriginalString);
-            request.Proxy = this.Account.Proxy;
-            request.CookieContainer = this.Account.Cookies;
+            request.Proxy = Account.Proxy;
+            request.CookieContainer = Account.Cookies;
             request.Method = "GET";
             request.ContentType = ConstSettings.DefaultRequestType;
             request.Accept = "application/json";
             request.UserAgent = ConstSettings.UserAgent;
-            var task = Task.Factory.FromAsync(request.BeginGetResponse, asyncResult => request.EndGetResponse(asyncResult), (object)null);
+            var task = Task.Factory.FromAsync(request.BeginGetResponse, asyncResult => request.EndGetResponse(asyncResult), null);
             Entry entry = null;
-            var result = await task.ContinueWith((t) =>
+            var result = await task.ContinueWith(t =>
             {
                 using (var response = t.Result as HttpWebResponse)
                 {
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        entry = (Entry)JsonParser.Parse(this.ReadResponseAsText(response), PObject.Entry);
+                        entry = (Entry)JsonParser.Parse(ReadResponseAsText(response), PObject.Entry);
                         return true;
                     }
                     else
@@ -509,20 +509,10 @@ namespace MailRuCloudApi
                 var multiFileParts = new List<MultiFilePart>();
                 foreach (var file in multiFileConfigs)
                 {
-                    var fileBytes = await this.GetFile(file);
-                    var conf = this.DeserializeMultiFileConfig(Encoding.UTF8.GetString(fileBytes));
+                    var fileBytes = await GetFile(file);
+                    var conf = DeserializeMultiFileConfig(Encoding.UTF8.GetString(fileBytes));
 
                     tempFiles.Add(new File(file.FullPath, conf.Size, FileType.MultiFile, null));
-                    //{
-                    //    //Name = conf.OriginalFileName,
-                    //    Size = new FileSize()
-                    //    {
-                    //        DefaultValue = conf.Size
-                    //    },
-                    //    FullPath = file.FullPath,
-                    //    Type = FileType.MultiFile,
-                    //    PrimaryName = file.PrimaryName
-                    //});
 
                     multiFileParts.AddRange(conf.Parts);
                 }
@@ -545,22 +535,22 @@ namespace MailRuCloudApi
         /// <param name="destinationPath">Destination path on the file system.</param>
         /// <param name="includeProgressEvent">Include changing progress event.</param>
         /// <returns>True or false result of the operation.</returns>
-        public async Task<bool> GetFile(File file, string destinationPath, bool includeProgressEvent = true)
+        public async Task<bool> GetFile(File file, string destinationPath)
         {
             MultiFile multiFile = null;
             if (file.Type == FileType.MultiFile)
             {
-                var fileBytes = (byte[])(await this.GetFile(new[] { file.FullPath }, null, null, 0));
-                multiFile = this.DeserializeMultiFileConfig(Encoding.UTF8.GetString(fileBytes));
+                var fileBytes = (byte[])(await GetFile(new[] { file.FullPath }, null, null));
+                multiFile = DeserializeMultiFileConfig(Encoding.UTF8.GetString(fileBytes));
             }
 
             var taskAction = new object[] { file, destinationPath, multiFile };
             return await Task.Factory.StartNew(
-                (action) =>
+                action =>
             {
                 var param = action as object[];
                 var fileInfo = param[0] as File;
-                var filePaths = new string[] { fileInfo.FullPath };
+                var filePaths = new[] { fileInfo.FullPath };
 
                 if (fileInfo.Type == FileType.MultiFile)
                 {
@@ -568,7 +558,7 @@ namespace MailRuCloudApi
                     filePaths = (param[2] as MultiFile).Parts.OrderBy(v => v.Order).Select(x => folder + x.OriginalFileName).ToArray();
                 }
 
-                return (bool)this.GetFile(filePaths, fileInfo.Name, param[1] as string, fileInfo.Size.DefaultValue).Result;
+                return (bool)GetFile(filePaths, fileInfo.Name, param[1] as string, fileInfo.Size.DefaultValue).Result;
             },
             taskAction);
         }
@@ -584,7 +574,7 @@ namespace MailRuCloudApi
             MultiFile multiFile = null;
             if (file.Type == FileType.MultiFile)
             {
-                var fileBytes = (byte[])(await this.GetFile(new[] { file.FullPath }, null, null, 0));
+                var fileBytes = (byte[])(await GetFile(new[] { file.FullPath }, null, null, 0));
                 multiFile = this.DeserializeMultiFileConfig(Encoding.UTF8.GetString(fileBytes));
             }
 

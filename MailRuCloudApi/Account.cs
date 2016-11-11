@@ -112,20 +112,14 @@ namespace MailRuCloudApi
                 {
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        if (this.Cookies != null && this.Cookies.Count > 0)
+                        if (Cookies != null && Cookies.Count > 0)
                         {
-                            this.EnsureSdcCookie();
-                            return this.GetAuthToken();
+                            EnsureSdcCookie();
+                            return GetAuthToken();
                         }
-                        else
-                        {
-                            return false;
-                        }
+                        return false;
                     }
-                    else
-                    {
-                        throw new Exception();
-                    }
+                    throw new Exception();
                 }
             }
         }
@@ -157,7 +151,7 @@ namespace MailRuCloudApi
         /// <returns>True or false result operation.</returns>
         private bool GetAuthToken()
         {
-            var uri = new Uri(string.Format("{0}/api/v2/tokens/csrf", ConstSettings.CloudDomain));
+            var uri = new Uri($"{ConstSettings.CloudDomain}/api/v2/tokens/csrf");
             var request = (HttpWebRequest)WebRequest.Create(uri.OriginalString);
             request.Proxy = this.Proxy;
             request.CookieContainer = this.Cookies;

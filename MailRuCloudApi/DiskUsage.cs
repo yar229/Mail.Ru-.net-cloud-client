@@ -25,15 +25,11 @@ namespace MailRuCloudApi
         /// <summary>
         /// Gets free disk size.
         /// </summary>
-        public FileSize Free
+        public FileSize Free => new FileSize
         {
-            get
-            {
-                return new FileSize
-                {
-                    DefaultValue = this.Total.DefaultValue - this.Used.DefaultValue
-                };
-            }
-        }
+            DefaultValue = Total.DefaultValue - Used.DefaultValue
+        };
+
+        public bool OverQuota { get; set; }
     }
 }

@@ -45,7 +45,6 @@ namespace MailRuCloudApi
         /// </summary>
         DiskUsage = 4,
 
-        Quota = 10,
         AccountInfo = 11
     }
 
@@ -86,17 +85,6 @@ namespace MailRuCloudApi
             {
                 case PObject.Token:
                     return (string)parsedJObject["body"]["token"];
-
-                case PObject.Quota:
-                    var overQuota = (bool)parsedJObject["body"]["overquota"];
-                    var used = (long)parsedJObject["body"]["used"] * 1024 * 1024;
-                    var total = (long)parsedJObject["body"]["total"] * 1024 * 1024;
-                    return new Quota
-                    {
-                        OverQuota = overQuota,
-                        Total = total,
-                        Used = used
-                    };
 
                 case PObject.AccountInfo:
                     var fileSizeLimit = (long)parsedJObject["body"]["cloud"]["file_size_limit"];
@@ -172,11 +160,13 @@ namespace MailRuCloudApi
 
                 case PObject.DiskUsage:
                     var diskSpace = parsedJObject["body"];
-                    var totalDiskSize = 0L;
+                    long totalDiskSize;
                     long.TryParse((string)diskSpace["total"], out totalDiskSize);
 
-                    var usedDiskSize = 0L;
+                    long usedDiskSize;
                     long.TryParse((string)diskSpace["used"], out usedDiskSize);
+
+                    bool overQuota = (bool)parsedJObject["body"]["overquota"];
                     return new DiskUsage
                     {
                         Total = new FileSize
@@ -186,7 +176,8 @@ namespace MailRuCloudApi
                         Used = new FileSize
                         {
                             DefaultValue = usedDiskSize * 1024L * 1024L
-                        }
+                        },
+                        OverQuota = overQuota
                     };
             }
 

@@ -29,7 +29,7 @@ namespace MailRuCloudApi
         /// <summary>
         /// Async tasks cancelation token.
         /// </summary>
-        private CancellationTokenSource _cancelToken = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cancelToken = new CancellationTokenSource();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MailRuCloud" /> class. Do not forget to set Account property before using any API functions.
@@ -176,12 +176,12 @@ namespace MailRuCloudApi
                 var fileBytes = await GetFile(file, false);
                 var conf = DeserializeMultiFileConfig(Encoding.UTF8.GetString(fileBytes));
                 var sourcePath = file.FullPath.Substring(0, file.FullPath.LastIndexOf("/", StringComparison.Ordinal) + 1);
-                var parts = conf.Parts.ToList();
+                //var parts = conf.Parts.ToList();
 
                 foreach (var item in conf.Parts)
                 {
                     var newPartName = item.OriginalFileName.Replace(file.Name, newFileName);
-                    result = await Rename(item.OriginalFileName, sourcePath + item.OriginalFileName, newPartName);
+                    /*result = */ await Rename(item.OriginalFileName, sourcePath + item.OriginalFileName, newPartName);
                 }
 
                 conf.Parts.ToList()
@@ -193,7 +193,7 @@ namespace MailRuCloudApi
                     conf.OriginalFileName = newFileName;
                     var tempFile = Path.GetTempFileName();
                     System.IO.File.WriteAllText(tempFile, GenerateMultiFileConfig(conf));
-                    result = await this.UploadFile(newConfName, tempFile, string.Empty, 0, new FileInfo(tempFile).Length, sourcePath, false);
+                    result = await UploadFile(newConfName, tempFile, string.Empty, 0, new FileInfo(tempFile).Length, sourcePath, false);
                     if (System.IO.File.Exists(tempFile))
                     {
                         try
@@ -321,7 +321,7 @@ namespace MailRuCloudApi
                 var sourcePath = file.FullPath.Substring(0, file.FullPath.LastIndexOf("/", StringComparison.Ordinal) + 1);
                 foreach (var item in conf.Parts)
                 {
-                    result = await Remove(sourcePath + item.OriginalFileName);
+                    /*result = */ await Remove(sourcePath + item.OriginalFileName);
                 }
 
                 result = await Remove(file.FullPath);
@@ -363,7 +363,7 @@ namespace MailRuCloudApi
 
             var url = new Uri($"{ConstSettings.CloudDomain}/api/v2/tokens/download");
             var request = (HttpWebRequest) WebRequest.Create(url.OriginalString);
-            if (this.Account != null)
+            if (Account != null)
             {
                 request.Proxy = Account.Proxy;
             }
@@ -461,36 +461,36 @@ namespace MailRuCloudApi
         }
 
 
-        public async Task<Quota> GetQuota()
-        {
-            Account.CheckAuth();
-            var uri = new Uri($"{ConstSettings.CloudDomain}/api/v2/user/space?token={Account.AuthToken}");
-            var request = (HttpWebRequest) WebRequest.Create(uri.OriginalString);
-            request.Proxy = Account.Proxy;
-            request.CookieContainer = Account.Cookies;
-            request.Method = "GET";
-            request.ContentType = ConstSettings.DefaultRequestType;
-            request.Accept = "application/json";
-            request.UserAgent = ConstSettings.UserAgent;
-            var task = Task.Factory.FromAsync(request.BeginGetResponse,
-                asyncResult => request.EndGetResponse(asyncResult), null);
-            Quota quota = null;
-            await task.ContinueWith((t) =>
-            {
-                using (var response = t.Result as HttpWebResponse)
-                {
-                    if (response != null && response.StatusCode == HttpStatusCode.OK)
-                    {
-                        string data = ReadResponseAsText(response);
-                        quota = (Quota) JsonParser.Parse(data, PObject.Quota);
-                        return true;
-                    }
-                    throw new Exception();
-                }
-            });
+        //public async Task<DiskUsage> GetQuota()
+        //{
+        //    Account.CheckAuth();
+        //    var uri = new Uri($"{ConstSettings.CloudDomain}/api/v2/user/space?token={Account.AuthToken}");
+        //    var request = (HttpWebRequest) WebRequest.Create(uri.OriginalString);
+        //    request.Proxy = Account.Proxy;
+        //    request.CookieContainer = Account.Cookies;
+        //    request.Method = "GET";
+        //    request.ContentType = ConstSettings.DefaultRequestType;
+        //    request.Accept = "application/json";
+        //    request.UserAgent = ConstSettings.UserAgent;
+        //    var task = Task.Factory.FromAsync(request.BeginGetResponse,
+        //        asyncResult => request.EndGetResponse(asyncResult), null);
+        //    DiskUsage quota = null;
+        //    await task.ContinueWith((t) =>
+        //    {
+        //        using (var response = t.Result as HttpWebResponse)
+        //        {
+        //            if (response != null && response.StatusCode == HttpStatusCode.OK)
+        //            {
+        //                string data = ReadResponseAsText(response);
+        //                quota = (DiskUsage) JsonParser.Parse(data, PObject.DiskUsage);
+        //                return true;
+        //            }
+        //            throw new Exception();
+        //        }
+        //    });
 
-            return quota;
-        }
+        //    return quota;
+        //}
 
         private async Task<AccountInfo> GetAccountInfo()
         {
@@ -765,7 +765,7 @@ namespace MailRuCloudApi
                 }
 
                 var partName = $"{file.Name}-{guid}-.Multifile-Part{partCount}";
-                if (!(result = await this.UploadFile(partName, file.FullName, string.Empty, curPosition, diffLength, destinationPath, true)))
+                if (!(result = await UploadFile(partName, file.FullName, string.Empty, curPosition, diffLength, destinationPath, true)))
                 {
                     return result;
                 }
@@ -1321,7 +1321,7 @@ namespace MailRuCloudApi
 
                     conf.Parts.ToList().ForEach(x => x.OriginalFileName = newParts[x.OriginalFileName]);
                     var newConfName = MoveOrCopy(fileInfo.PrimaryName, fileInfo.FullPath, destPath, needMove).Result;
-                    if (result = newConfName != fileInfo.PrimaryName)
+                    if (newConfName != fileInfo.PrimaryName)
                     {
                         var f = new File(
                             destPath.EndsWith("/") ? destPath + newConfName : destPath + "/" + newConfName, 0,
@@ -1365,7 +1365,7 @@ namespace MailRuCloudApi
                         }
                     }
 
-                    return result;
+                    return false;
                 },
                 taskAction);
         }
@@ -1614,9 +1614,9 @@ namespace MailRuCloudApi
         {
             if (!useAnonymousUser)
             {
-                this.Account.CheckAuth();
+                Account.CheckAuth();
             }
-            var uri = new Uri(string.Format("{0}/api/v2/dispatcher?{2}={1}", ConstSettings.CloudDomain, !useAnonymousUser ? this.Account.AuthToken : 2.ToString(), !useAnonymousUser ? "token" : "api"));
+            var uri = new Uri(string.Format("{0}/api/v2/dispatcher?{2}={1}", ConstSettings.CloudDomain, !useAnonymousUser ? Account.AuthToken : 2.ToString(), !useAnonymousUser ? "token" : "api"));
             var request = (HttpWebRequest)WebRequest.Create(uri.OriginalString);
             if (Account != null)
             {

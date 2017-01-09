@@ -6,10 +6,11 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.ComponentModel;
 
 namespace MailRuCloudApi
 {
+    using System;
+
     /// <summary>
     /// Cloud file type.
     /// </summary>
@@ -44,25 +45,12 @@ namespace MailRuCloudApi
 
 
         private string _fullPath;
-        private string _name;
 
         /// <summary>
         /// Gets file name.
         /// </summary>
         /// <value>File name.</value>
-        public string Name
-        {
-            get
-            {
-                //return _name;
-                return FullPath.Substring(FullPath.LastIndexOf("/", StringComparison.Ordinal) + 1);
-            }
-            //set
-            //{
-            //    if (value.Contains("/") || value.Contains("\\")) throw new InvalidEnumArgumentException(nameof(Name));
-            //    _name = value;
-            //}
-        }
+        public string Name => FullPath.Substring(FullPath.LastIndexOf("/", StringComparison.Ordinal) + 1);
 
         public string Extension => System.IO.Path.GetExtension(Name);
 
@@ -118,6 +106,11 @@ namespace MailRuCloudApi
         public FileType Type { get; internal set; }
 
         /// <summary>
+        /// Gets last modified time of file in UTC format.
+        /// </summary>
+        public DateTime LastModifiedTimeUTC { get; internal set; }
+
+        /// <summary>
         /// Gets or sets base file name.
         /// </summary>
         internal string PrimaryName { get; set; }
@@ -128,29 +121,8 @@ namespace MailRuCloudApi
         /// <value>File size.</value>
         internal FileSize PrimarySize => Size;
 
-        public DateTime CreationTimeUtc
-        {
-            get
-            {
-                return DateTime.Now.AddDays(-1);
-            }
-            set { }
-        }
-        public DateTime LastWriteTimeUtc
-        {
-            get
-            {
-                return DateTime.Now.AddDays(-1);
-            }
-            set { }
-        }
-        public DateTime LastAccessTimeUtc
-        {
-            get
-            {
-                return DateTime.Now.AddDays(-1);
-            }
-            set { }
-        }
+        public DateTime CreationTimeUtc { get; set; }
+        public DateTime LastWriteTimeUtc { get; set; }
+        public DateTime LastAccessTimeUtc { get; set; }
     }
 }

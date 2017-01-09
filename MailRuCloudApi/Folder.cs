@@ -18,8 +18,9 @@ namespace MailRuCloudApi
         /// <summary>
         /// Initializes a new instance of the <see cref="Folder" /> class.
         /// </summary>
-        public Folder()
+        public Folder(string fullPath)
         {
+            FullPath = fullPath;
         }
 
         /// <summary>
@@ -27,18 +28,15 @@ namespace MailRuCloudApi
         /// </summary>
         /// <param name="foldersCount">Number of folders.</param>
         /// <param name="filesCount">Number of files.</param>
-        /// <param name="name">Folder name.</param>
         /// <param name="size">Folder size.</param>
         /// <param name="fullPath">Full folder path.</param>
         /// <param name="publicLink">Public folder link.</param>
-        public Folder(int foldersCount, int filesCount, /*string name,*/ FileSize size, string fullPath, string publicLink = null)
+        public Folder(int foldersCount, int filesCount, FileSize size, string fullPath, string publicLink = null):this(fullPath)
         {
-            this.NumberOfFolders = foldersCount;
-            this.NumberOfFiles = filesCount;
-            //this.Name = name;
-            this.Size = size;
-            this.FullPath = fullPath;
-            this.PublicLink = publicLink;
+            NumberOfFolders = foldersCount;
+            NumberOfFiles = filesCount;
+            Size = size;
+            PublicLink = publicLink;
         }
 
         /// <summary>
@@ -57,16 +55,7 @@ namespace MailRuCloudApi
         /// Gets folder name.
         /// </summary>
         /// <value>Folder name.</value>
-        public string Name
-        {
-            get
-            {
-                if (FullPath == "/") return "";
-                return FullPath.TrimEnd('/').Remove(0, FullPath.LastIndexOf('/') + 1);
-                //Substring(FullPath.LastIndexOf('/') + 1, FullPath.Length - 1);
-
-            }
-        }
+        public string Name => FullPath == "/" ? "" : FullPath.TrimEnd('/').Remove(0, FullPath.LastIndexOf('/') + 1);
 
         /// <summary>
         /// Gets folder size.
@@ -81,7 +70,6 @@ namespace MailRuCloudApi
         public string FullPath
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -90,40 +78,14 @@ namespace MailRuCloudApi
         /// <value>Public link.</value>
         public string PublicLink { get; internal set; }
 
-        public DateTime CreationTimeUtc
-        {
-            get
-            {
-                return DateTime.Now.AddDays(-1);
-            }
-            set { }
-        }
+        public DateTime CreationTimeUtc { get; set; } = DateTime.Now.AddDays(-1);
 
-        public DateTime LastWriteTimeUtc
-        {
-            get
-            {
-                return DateTime.Now.AddDays(-1);
-            }
-            set { }
-        }
+        public DateTime LastWriteTimeUtc { get; set; } = DateTime.Now.AddDays(-1);
 
-        public DateTime LastAccessTimeUtc
-        {
-            get
-            {
-                return DateTime.Now.AddDays(-1);
-            }
-            set { }
-        }
 
-        public FileAttributes Attributes
-        {
-            get
-            {
-                return FileAttributes.Directory;
-            }
-            set { }
-        }
+        public DateTime LastAccessTimeUtc { get; set; } = DateTime.Now.AddDays(-1);
+
+
+        public FileAttributes Attributes { get; set; } = FileAttributes.Directory;
     }
 }

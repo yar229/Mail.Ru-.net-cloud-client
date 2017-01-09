@@ -8,37 +8,6 @@
 namespace MailRuCloudApi
 {
     /// <summary>
-    /// The unit metter.
-    /// </summary>
-    public enum StorageUnit
-    {
-        /// <summary>
-        /// Unit as byte type.
-        /// </summary>
-        Byte = 0,
-
-        /// <summary>
-        /// Unit as kilobyte.
-        /// </summary>
-        Kb = 1,
-
-        /// <summary>
-        /// Unit as megabyte.
-        /// </summary>
-        Mb = 2,
-
-        /// <summary>
-        /// Unit as gigabyte.
-        /// </summary>
-        Gb = 3,
-
-        /// <summary>
-        /// Unit as terabyte.
-        /// </summary>
-        Tb = 4
-    }
-
-    /// <summary>
     /// File size definition.
     /// </summary>
     public class FileSize
@@ -97,15 +66,15 @@ namespace MailRuCloudApi
                 NormalizedType = StorageUnit.Mb;
                 NormalizedValue = (float)_defValue / 1024f / 1024f;
             }
-            else if (this.defValue >= 1024L * 1024L * 1024L && this.defValue < 1024L * 1024L * 1024L * 1024L)
+            else if (_defValue >= 1024L * 1024L * 1024L && _defValue < 1024L * 1024L * 1024L * 1024L)
             {
                 NormalizedType = StorageUnit.Gb;
                 NormalizedValue = (float)_defValue / 1024f / 1024f / 1024f;
             }
             else
             {
-                this.NormalizedType = StorageUnit.Tb;
-                this.NormalizedValue = (float)this.defValue / 1024f / 1024f / 1024f / 1024f;
+                NormalizedType = StorageUnit.Tb;
+                NormalizedValue = (float)_defValue / 1024f / 1024f / 1024f / 1024f;
             }
         }
     }

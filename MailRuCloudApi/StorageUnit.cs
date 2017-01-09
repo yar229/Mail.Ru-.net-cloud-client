@@ -23,6 +23,11 @@
         /// <summary>
         /// Unit as gigabyte.
         /// </summary>
-        Gb = 3
+        Gb = 3,
+
+        /// <summary>
+        /// Unit as terabyte.
+        /// </summary>
+        Tb = 4
     }
 }

@@ -29,7 +29,7 @@ namespace MailRuCloudApi
         /// <summary>
         /// Async tasks cancelation token.
         /// </summary>
-        private CancellationTokenSource cancelToken = new CancellationTokenSource();
+        private CancellationTokenSource _cancelToken = new CancellationTokenSource();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MailRuCloud" /> class. Do not forget to set Account property before using any API functions.
@@ -463,7 +463,7 @@ namespace MailRuCloudApi
 
         public async Task<Quota> GetQuota()
         {
-            CheckAuth();
+            Account.CheckAuth();
             var uri = new Uri($"{ConstSettings.CloudDomain}/api/v2/user/space?token={Account.AuthToken}");
             var request = (HttpWebRequest) WebRequest.Create(uri.OriginalString);
             request.Proxy = Account.Proxy;
@@ -494,7 +494,7 @@ namespace MailRuCloudApi
 
         private async Task<AccountInfo> GetAccountInfo()
         {
-            CheckAuth();
+            Account.CheckAuth();
             var uri = new Uri($"{ConstSettings.CloudDomain}/api/v2/user?token={Account.AuthToken}");
             var request = (HttpWebRequest)WebRequest.Create(uri.OriginalString);
             request.Proxy = Account.Proxy;
@@ -601,7 +601,7 @@ namespace MailRuCloudApi
 
         public async Task<bool> CloneItem(string path, string url)
         {
-            CheckAuth();
+            Account.CheckAuth();
             if (string.IsNullOrEmpty(path))
             {
                 path = "/";
@@ -719,7 +719,7 @@ namespace MailRuCloudApi
 
         public async Task<Stream> GetFileStream(File file, long? start, long? end)
         {
-            CheckAuth();
+            Account.CheckAuth();
             CookieContainer cookie = Account.Cookies;
             var shard = await GetShardInfo(ShardType.Get, true, cookie);
             Stream stream = new DownloadStream(file, shard, Account, _cancelToken, start, end);
@@ -729,7 +729,7 @@ namespace MailRuCloudApi
 
         public Stream GetUploadStream(string destinationPath, string extension, long size)
         {
-            CheckAuth();
+            Account.CheckAuth();
             var shard = GetShardInfo(ShardType.Upload).Result;
 
             var res = new UploadStream(destinationPath, shard, Account, _cancelToken, size);
@@ -1037,7 +1037,6 @@ namespace MailRuCloudApi
         private async Task<object> GetFile(string[] sourceFullFilePaths, string fileName, string destinationPath,
             long contentLength = 0)
         {
-<<<<<<< HEAD
             Account.CheckAuth();
             var shard = await GetShardInfo(ShardType.Get);
             destinationPath = destinationPath == null || destinationPath.EndsWith(@"\")

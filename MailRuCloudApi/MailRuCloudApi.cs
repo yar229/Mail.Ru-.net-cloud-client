@@ -29,7 +29,7 @@ namespace MailRuCloudApi
         /// <summary>
         /// Async tasks cancelation token.
         /// </summary>
-        private readonly CancellationTokenSource _cancelToken = new CancellationTokenSource();
+        private CancellationTokenSource _cancelToken = new CancellationTokenSource();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MailRuCloud" /> class. Do not forget to set Account property before using any API functions.
@@ -64,7 +64,6 @@ namespace MailRuCloudApi
         /// </summary>
         /// <value>Account info.</value>
         public Account Account { get; set; }
-
 
 
         /// <summary>
@@ -177,6 +176,7 @@ namespace MailRuCloudApi
                 var fileBytes = await GetFile(file, false);
                 var conf = DeserializeMultiFileConfig(Encoding.UTF8.GetString(fileBytes));
                 var sourcePath = file.FullPath.Substring(0, file.FullPath.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                var parts = conf.Parts.ToList();
 
                 foreach (var item in conf.Parts)
                 {
@@ -193,10 +193,7 @@ namespace MailRuCloudApi
                     conf.OriginalFileName = newFileName;
                     var tempFile = Path.GetTempFileName();
                     System.IO.File.WriteAllText(tempFile, GenerateMultiFileConfig(conf));
-                    result =
-                        await
-                            UploadFile(newConfName, tempFile, string.Empty, 0, new FileInfo(tempFile).Length, sourcePath,
-                                false);
+                    result = await this.UploadFile(newConfName, tempFile, string.Empty, 0, new FileInfo(tempFile).Length, sourcePath, false);
                     if (System.IO.File.Exists(tempFile))
                     {
                         try
@@ -366,7 +363,10 @@ namespace MailRuCloudApi
 
             var url = new Uri($"{ConstSettings.CloudDomain}/api/v2/tokens/download");
             var request = (HttpWebRequest) WebRequest.Create(url.OriginalString);
-            request.Proxy = Account.Proxy;
+            if (this.Account != null)
+            {
+                request.Proxy = Account.Proxy;
+            }
             request.CookieContainer = cookie;
             request.Method = "POST";
             request.ContentLength = addFileRequest.LongLength;
@@ -463,7 +463,7 @@ namespace MailRuCloudApi
 
         public async Task<Quota> GetQuota()
         {
-            CheckAuth();
+            Account.CheckAuth();
             var uri = new Uri($"{ConstSettings.CloudDomain}/api/v2/user/space?token={Account.AuthToken}");
             var request = (HttpWebRequest) WebRequest.Create(uri.OriginalString);
             request.Proxy = Account.Proxy;
@@ -494,7 +494,7 @@ namespace MailRuCloudApi
 
         private async Task<AccountInfo> GetAccountInfo()
         {
-            CheckAuth();
+            Account.CheckAuth();
             var uri = new Uri($"{ConstSettings.CloudDomain}/api/v2/user?token={Account.AuthToken}");
             var request = (HttpWebRequest)WebRequest.Create(uri.OriginalString);
             request.Proxy = Account.Proxy;
@@ -531,7 +531,7 @@ namespace MailRuCloudApi
         /// <returns>List of the items.</returns>
         public async Task<Entry> GetItems(string path)
         {
-            CheckAuth();
+            Account.CheckAuth();
             if (string.IsNullOrEmpty(path))
             {
                 path = "/";
@@ -601,7 +601,7 @@ namespace MailRuCloudApi
 
         public async Task<bool> CloneItem(string path, string url)
         {
-            CheckAuth();
+            Account.CheckAuth();
             if (string.IsNullOrEmpty(path))
             {
                 path = "/";
@@ -719,7 +719,7 @@ namespace MailRuCloudApi
 
         public async Task<Stream> GetFileStream(File file, long? start, long? end)
         {
-            CheckAuth();
+            Account.CheckAuth();
             CookieContainer cookie = Account.Cookies;
             var shard = await GetShardInfo(ShardType.Get, true, cookie);
             Stream stream = new DownloadStream(file, shard, Account, _cancelToken, start, end);
@@ -729,7 +729,7 @@ namespace MailRuCloudApi
 
         public Stream GetUploadStream(string destinationPath, string extension, long size)
         {
-            CheckAuth();
+            Account.CheckAuth();
             var shard = GetShardInfo(ShardType.Upload).Result;
 
             var res = new UploadStream(destinationPath, shard, Account, _cancelToken, size);
@@ -745,7 +745,7 @@ namespace MailRuCloudApi
         /// <returns>True or false result of the operation.</returns>
         public async Task<bool> UploadFile(FileInfo file, string destinationPath)
         {
-            var maxFileSize = 2L*1000L*1000L*1000L;
+            var maxFileSize = 2L * 1000L * 1000L * 1000L;
             if (maxFileSize >= file.Length)
             {
                 return await UploadFile(file.Name, file.FullName, file.Extension, 0, file.Length, destinationPath, true);
@@ -765,11 +765,7 @@ namespace MailRuCloudApi
                 }
 
                 var partName = $"{file.Name}-{guid}-.Multifile-Part{partCount}";
-                if (
-                    !(result =
-                        await
-                            UploadFile(partName, file.FullName, string.Empty, curPosition, diffLength, destinationPath,
-                                true)))
+                if (!(result = await this.UploadFile(partName, file.FullName, string.Empty, curPosition, diffLength, destinationPath, true)))
                 {
                     return result;
                 }
@@ -945,7 +941,7 @@ namespace MailRuCloudApi
                     $"The maximum file size is {maxFileSize} byte. Currently file size is {size} byte."));
             }
 
-            CheckAuth();
+            Account.CheckAuth();
             var shard = await GetShardInfo(ShardType.Upload);
             var boundary = Guid.NewGuid();
 
@@ -1041,7 +1037,7 @@ namespace MailRuCloudApi
         private async Task<object> GetFile(string[] sourceFullFilePaths, string fileName, string destinationPath,
             long contentLength = 0)
         {
-            CheckAuth();
+            Account.CheckAuth();
             var shard = await GetShardInfo(ShardType.Get);
             destinationPath = destinationPath == null || destinationPath.EndsWith(@"\")
                 ? destinationPath
@@ -1327,7 +1323,6 @@ namespace MailRuCloudApi
                     var newConfName = MoveOrCopy(fileInfo.PrimaryName, fileInfo.FullPath, destPath, needMove).Result;
                     if (result = newConfName != fileInfo.PrimaryName)
                     {
-
                         var f = new File(
                             destPath.EndsWith("/") ? destPath + newConfName : destPath + "/" + newConfName, 0,
                             FileType.SingleFile, null);
@@ -1617,10 +1612,16 @@ namespace MailRuCloudApi
         /// <returns>Shard info.</returns>
         private async Task<ShardInfo> GetShardInfo(ShardType shardType, bool useAnonymousUser, CookieContainer cookie)
         {
-            CheckAuth();
-            var uri = new Uri(string.Format("{0}/api/v2/dispatcher?{2}={1}", ConstSettings.CloudDomain, !useAnonymousUser ? Account.AuthToken : 2.ToString(), !useAnonymousUser ? "token" : "api"));
+            if (!useAnonymousUser)
+            {
+                this.Account.CheckAuth();
+            }
+            var uri = new Uri(string.Format("{0}/api/v2/dispatcher?{2}={1}", ConstSettings.CloudDomain, !useAnonymousUser ? this.Account.AuthToken : 2.ToString(), !useAnonymousUser ? "token" : "api"));
             var request = (HttpWebRequest)WebRequest.Create(uri.OriginalString);
-            request.Proxy = Account.Proxy;
+            if (Account != null)
+            {
+                request.Proxy = this.Account.Proxy;
+            }
             request.CookieContainer = !useAnonymousUser ? Account.Cookies : new CookieContainer();
             request.Method = "GET";
             request.ContentType = ConstSettings.DefaultRequestType;
@@ -1639,25 +1640,6 @@ namespace MailRuCloudApi
                     throw new Exception();
                 }
             });
-        }
-
-        /// <summary>
-        /// Need to add this function for all calls.
-        /// </summary>
-        private void CheckAuth()
-        {
-            if (Account == null)
-            {
-                throw new Exception("Account is null or empty");
-            }
-
-            if (string.IsNullOrEmpty(Account.AuthToken))
-            {
-                if (!Account.Login())
-                {
-                    throw new Exception("Auth token has't been retrieved.");
-                }
-            }
         }
 
         /// <summary>

@@ -66,10 +66,15 @@ namespace MailRuCloudApi
                 NormalizedType = StorageUnit.Mb;
                 NormalizedValue = (float)_defValue / 1024f / 1024f;
             }
-            else
+            else if (_defValue >= 1024L * 1024L * 1024L && _defValue < 1024L * 1024L * 1024L * 1024L)
             {
                 NormalizedType = StorageUnit.Gb;
                 NormalizedValue = (float)_defValue / 1024f / 1024f / 1024f;
+            }
+            else
+            {
+                NormalizedType = StorageUnit.Tb;
+                NormalizedValue = (float)_defValue / 1024f / 1024f / 1024f / 1024f;
             }
         }
     }

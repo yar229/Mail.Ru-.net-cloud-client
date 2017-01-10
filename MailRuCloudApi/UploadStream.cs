@@ -189,7 +189,7 @@ namespace MailRuCloudApi
                             var sizeResult = long.Parse(resp[1].Trim('\r', '\n', ' '));
 
                             _file.Hash = hashResult;
-                            _file.Size.DefaultValue = sizeResult;
+                            _file.Size = sizeResult;
 
                             return AddFileInCloud(_file).Result;
                         }
@@ -354,7 +354,7 @@ namespace MailRuCloudApi
 
         public override void SetLength(long value)
         {
-            _file.Size.DefaultValue = value;
+            _file.Size = value;
         }
 
         public override int Read(byte[] buffer, int offset, int count)

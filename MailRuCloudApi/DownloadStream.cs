@@ -235,7 +235,7 @@ namespace MailRuCloudApi
                     return l;
                 }
 
-                return _file.Size?.DefaultValue ?? 0; 
+                return _file.Size.DefaultValue; 
                 
             }
         }

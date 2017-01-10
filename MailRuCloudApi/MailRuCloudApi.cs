@@ -568,10 +568,7 @@ namespace MailRuCloudApi
                 var multiFileConfigs =
                     entry.Files.Where(x => !string.IsNullOrEmpty(Regex.Match(x.Name, pattern).Value)).ToList();
                 var tempFiles = new List<File>();
-                multiFileConfigs.ForEach(x => x.Size = new FileSize()
-                {
-                    DefaultValue = 0
-                });
+                multiFileConfigs.ForEach(x => x.Size = 0);
 
                 var multiFileParts = new List<MultiFilePart>();
                 foreach (var file in multiFileConfigs)
@@ -877,14 +874,8 @@ namespace MailRuCloudApi
                                 new ProgressChangeTaskState()
                                 {
                                     Type = operation,
-                                    TotalBytes = new FileSize()
-                                    {
-                                        DefaultValue = contentLength
-                                    },
-                                    BytesInProgress = new FileSize()
-                                    {
-                                        DefaultValue = outputStream.Position
-                                    }
+                                    TotalBytes = contentLength,
+                                    BytesInProgress = outputStream.Position
                                 }));
                         }
                     }
@@ -897,14 +888,8 @@ namespace MailRuCloudApi
                         new ProgressChangeTaskState()
                         {
                             Type = operation,
-                            TotalBytes = new FileSize()
-                            {
-                                DefaultValue = contentLength
-                            },
-                            BytesInProgress = new FileSize()
-                            {
-                                DefaultValue = outputStream.Position
-                            }
+                            TotalBytes = contentLength,
+                            BytesInProgress = outputStream.Position
                         }));
                 }
             }
@@ -995,19 +980,8 @@ namespace MailRuCloudApi
                                     var sizeResult = long.Parse(resp[1].Replace("\r\n", string.Empty));
 
 
-                                    var f = new File(HttpUtility.UrlDecode(destinationPath) + fileName, sizeResult,
-                                        FileType.SingleFile, hashResult);
+                                    var f = new File(HttpUtility.UrlDecode(destinationPath) + fileName, sizeResult, FileType.SingleFile, hashResult);
                                     return AddFileInCloud(f).Result;
-                                    //return this.AddFileInCloud(new File()
-                                    //{
-                                    //    //Name = fileName,
-                                    //    FullPath = HttpUtility.UrlDecode(destinationPath) + fileName,
-                                    //    Hash = hashResult,
-                                    //    Size = new FileSize()
-                                    //    {
-                                    //        DefaultValue = sizeResult
-                                    //    }
-                                    //}).Result;
                                 }
                             }
                         }
@@ -1496,14 +1470,8 @@ namespace MailRuCloudApi
                                 new ProgressChangeTaskState()
                                 {
                                     Type = operation,
-                                    TotalBytes = new FileSize()
-                                    {
-                                        DefaultValue = sourceStream.BaseStream.Length
-                                    },
-                                    BytesInProgress = new FileSize()
-                                    {
-                                        DefaultValue = 0L
-                                    }
+                                    TotalBytes = sourceStream.BaseStream.Length,
+                                    BytesInProgress = 0L
                                 }));
             }
 
@@ -1540,14 +1508,8 @@ namespace MailRuCloudApi
                                 new ProgressChangeTaskState()
                                 {
                                     Type = operation,
-                                    TotalBytes = new FileSize()
-                                    {
-                                        DefaultValue = sourceStream.BaseStream.Length
-                                    },
-                                    BytesInProgress = new FileSize()
-                                    {
-                                        DefaultValue = sourceStream.BaseStream.Position
-                                    }
+                                    TotalBytes = sourceStream.BaseStream.Length,
+                                    BytesInProgress = sourceStream.BaseStream.Position
                                 }));
                         }
                     }
@@ -1561,14 +1523,8 @@ namespace MailRuCloudApi
                                 new ProgressChangeTaskState()
                                 {
                                     Type = operation,
-                                    TotalBytes = new FileSize()
-                                    {
-                                        DefaultValue = sourceStream.BaseStream.Length
-                                    },
-                                    BytesInProgress = new FileSize()
-                                    {
-                                        DefaultValue = sourceStream.BaseStream.Position == 0 ? length : sourceStream.BaseStream.Position
-                                    }
+                                    TotalBytes = sourceStream.BaseStream.Length,
+                                    BytesInProgress = sourceStream.BaseStream.Position == 0 ? length : sourceStream.BaseStream.Position
                                 }));
             }
         }

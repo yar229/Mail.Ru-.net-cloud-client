@@ -5,35 +5,31 @@
 // <author>Korolev Erast.</author>
 //-----------------------------------------------------------------------
 
+using System;
+
 namespace MailRuCloudApi
 {
     /// <summary>
     /// File size definition.
     /// </summary>
-    public class FileSize
+    public struct FileSize : IEquatable<FileSize>
     {
+        public FileSize(long defaultValue) : this()
+        {
+            _defValue = defaultValue;
+            SetNormalizedValue();
+        }
+
         /// <summary>
         /// Private variable for default value.
         /// </summary>
-        private long _defValue;
+        private readonly long _defValue;
 
         /// <summary>
         /// Gets default size in bytes.
         /// </summary>
         /// <value>File size.</value>
-        public long DefaultValue
-        {
-            get
-            {
-                return _defValue;
-            }
-
-            internal set
-            {
-                _defValue = value;
-                SetNormalizedValue();
-            }
-        }
+        public long DefaultValue => _defValue;
 
         /// <summary>
         /// Gets normalized  file size, auto detect storage unit.
@@ -46,6 +42,8 @@ namespace MailRuCloudApi
         /// </summary>
         public StorageUnit NormalizedType { get; private set; }
 
+
+
         /// <summary>
         /// Normalized value detection and auto detection storage unit.
         /// </summary>
@@ -54,28 +52,65 @@ namespace MailRuCloudApi
             if (_defValue < 1024L)
             {
                 NormalizedType = StorageUnit.Byte;
-                NormalizedValue = (float)_defValue;
+                NormalizedValue = _defValue;
             }
             else if (_defValue >= 1024L && _defValue < 1024L * 1024L)
             {
                 NormalizedType = StorageUnit.Kb;
-                NormalizedValue = (float)_defValue / 1024f;
+                NormalizedValue = _defValue / 1024f;
             }
             else if (_defValue >= 1024L * 1024L && _defValue < 1024L * 1024L * 1024L)
             {
                 NormalizedType = StorageUnit.Mb;
-                NormalizedValue = (float)_defValue / 1024f / 1024f;
+                NormalizedValue = _defValue / 1024f / 1024f;
             }
             else if (_defValue >= 1024L * 1024L * 1024L && _defValue < 1024L * 1024L * 1024L * 1024L)
             {
                 NormalizedType = StorageUnit.Gb;
-                NormalizedValue = (float)_defValue / 1024f / 1024f / 1024f;
+                NormalizedValue = _defValue / 1024f / 1024f / 1024f;
             }
             else
             {
                 NormalizedType = StorageUnit.Tb;
-                NormalizedValue = (float)_defValue / 1024f / 1024f / 1024f / 1024f;
+                NormalizedValue = _defValue / 1024f / 1024f / 1024f / 1024f;
             }
         }
+
+        #region == Equality ===================================================================================================================
+        public static implicit operator FileSize(long defaultValue)
+        {
+            return new FileSize(defaultValue);
+        }
+
+        public static FileSize operator +(FileSize first, FileSize second)
+        {
+            return new FileSize(first.DefaultValue + second.DefaultValue);
+        }
+
+        public static FileSize operator -(FileSize first, FileSize second)
+        {
+            return new FileSize(first.DefaultValue - second.DefaultValue);
+        }
+
+        public bool Equals(FileSize other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return _defValue == other._defValue;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((FileSize)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return _defValue.GetHashCode();
+        }
+        #endregion == Equality ===================================================================================================================
     }
 }

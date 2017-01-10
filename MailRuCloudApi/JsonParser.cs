@@ -118,10 +118,7 @@ namespace MailRuCloudApi
                             {
                                 NumberOfFolders = (int)item["count"]["folders"],
                                 NumberOfFiles = (int)item["count"]["files"],
-                                Size = new FileSize()
-                                {
-                                    DefaultValue = size
-                                },
+                                Size = size,
                                 PublicLink = weblink
                             });
                         }
@@ -169,14 +166,8 @@ namespace MailRuCloudApi
                     bool overQuota = (bool)parsedJObject["body"]["overquota"];
                     return new DiskUsage
                     {
-                        Total = new FileSize
-                        {
-                            DefaultValue = totalDiskSize * 1024L * 1024L
-                        },
-                        Used = new FileSize
-                        {
-                            DefaultValue = usedDiskSize * 1024L * 1024L
-                        },
+                        Total = totalDiskSize * 1024L * 1024L,
+                        Used = usedDiskSize * 1024L * 1024L,
                         OverQuota = overQuota
                     };
             }

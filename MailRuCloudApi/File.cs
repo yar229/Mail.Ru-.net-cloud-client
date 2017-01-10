@@ -35,10 +35,7 @@ namespace MailRuCloudApi
         public File(string fullPath, long size, FileType fileType, string hash)
         {
             FullPath = fullPath;
-            Size = new FileSize
-            {
-                DefaultValue = size
-            };
+            Size = size;
             Type = fileType;
             Hash = hash;
         }

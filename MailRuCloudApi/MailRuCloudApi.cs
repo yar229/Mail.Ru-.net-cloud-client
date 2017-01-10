@@ -410,8 +410,7 @@ namespace MailRuCloudApi
                 return false;
             }
 
-            return (await PublishUnpulishLink(file.Name, file.FullPath, false, file.PublicLink)).ToUpper() ==
-                   file.FullPath.ToUpper();
+            return (await PublishUnpulishLink(file.Name, file.FullPath, false, file.PublicLink)).ToUpper() == file.FullPath.ToUpper();
         }
 
         /// <summary>
@@ -421,8 +420,7 @@ namespace MailRuCloudApi
         /// <returns>True or false result of the operation.</returns>
         public async Task<bool> UnpublishLink(Folder folder)
         {
-            return (await PublishUnpulishLink(folder.Name, folder.FullPath, false, folder.PublicLink)).ToUpper() ==
-                   folder.FullPath.ToUpper();
+            return (await PublishUnpulishLink(folder.Name, folder.FullPath, false, folder.PublicLink)).ToUpper() == folder.FullPath.ToUpper();
         }
 
         /// <summary>
@@ -459,38 +457,6 @@ namespace MailRuCloudApi
         {
             return await GetItems(folder.FullPath);
         }
-
-
-        //public async Task<DiskUsage> GetQuota()
-        //{
-        //    Account.CheckAuth();
-        //    var uri = new Uri($"{ConstSettings.CloudDomain}/api/v2/user/space?token={Account.AuthToken}");
-        //    var request = (HttpWebRequest) WebRequest.Create(uri.OriginalString);
-        //    request.Proxy = Account.Proxy;
-        //    request.CookieContainer = Account.Cookies;
-        //    request.Method = "GET";
-        //    request.ContentType = ConstSettings.DefaultRequestType;
-        //    request.Accept = "application/json";
-        //    request.UserAgent = ConstSettings.UserAgent;
-        //    var task = Task.Factory.FromAsync(request.BeginGetResponse,
-        //        asyncResult => request.EndGetResponse(asyncResult), null);
-        //    DiskUsage quota = null;
-        //    await task.ContinueWith((t) =>
-        //    {
-        //        using (var response = t.Result as HttpWebResponse)
-        //        {
-        //            if (response != null && response.StatusCode == HttpStatusCode.OK)
-        //            {
-        //                string data = ReadResponseAsText(response);
-        //                quota = (DiskUsage) JsonParser.Parse(data, PObject.DiskUsage);
-        //                return true;
-        //            }
-        //            throw new Exception();
-        //        }
-        //    });
-
-        //    return quota;
-        //}
 
         private async Task<AccountInfo> GetAccountInfo()
         {

@@ -32,7 +32,7 @@ namespace MailRuCloudApi
         public override DateTime LastWriteTimeUtc => FileHeader.LastWriteTimeUtc;
         public override DateTime LastAccessTimeUtc => FileHeader.LastAccessTimeUtc;
 
-
+        public override List<File> Files => FileParts;
 
         public File FileHeader { get; set; }
         public List<File> FileParts = new List<File>();

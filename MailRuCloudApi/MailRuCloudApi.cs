@@ -5,6 +5,7 @@
 // <author>Korolev Erast.</author>
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api;
@@ -284,7 +285,7 @@ namespace MailRuCloudApi
 
         public async Task<Stream> GetFileDownloadStream(File file, long? start, long? end)
         {
-            var task = Task.FromResult(new DownloadStream(file, CloudApi, start, end));
+            var task = Task.FromResult(new DownloadStream(file.Files, CloudApi, start, end));
             Stream stream = await task;
             return stream;
         }

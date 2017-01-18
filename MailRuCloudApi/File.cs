@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 
 namespace MailRuCloudApi
 {
@@ -96,6 +97,8 @@ namespace MailRuCloudApi
         /// Gets last modified time of file in UTC format.
         /// </summary>
         public DateTime LastModifiedTimeUTC { get; internal set; }
+
+        public virtual List<File> Files => new List<File> {this};
 
         /// <summary>
         /// Gets or sets base file name.

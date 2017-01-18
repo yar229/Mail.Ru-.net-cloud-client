@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +13,7 @@ namespace MailRuCloudApi.Api
     {
         private const int InnerBufferSize = 65536;
 
-        private readonly File _file;
+        private readonly IList<File> _files;
         private readonly ShardInfo _shard;
         private readonly CloudApi _cloud;
         private readonly long? _start;
@@ -19,9 +22,9 @@ namespace MailRuCloudApi.Api
         private RingBufferedStream _innerStream;
 
 
-        public DownloadStream(File file, CloudApi cloud, long? start, long? end)
+        public DownloadStream(IList<File> files, CloudApi cloud, long? start, long? end)
         {
-            _file = file;
+            _files = files;
             _cloud = cloud;
             _start = start;
             _end = end;
@@ -36,52 +39,55 @@ namespace MailRuCloudApi.Api
         {
             _innerStream = new RingBufferedStream(InnerBufferSize);
 
-            var t = GetFileStream(_file.FullPath);
+            var t = GetFileStream();
         }
 
 
 
-        private async Task<object> GetFileStream(string sourceFullFilePath)
+        private async Task<object> GetFileStream()
         {
-            var request = (HttpWebRequest)WebRequest.Create($"{_shard.Url}{Uri.EscapeDataString(sourceFullFilePath)}");
-            request.Proxy = _cloud.Account.Proxy;
-            request.CookieContainer = _cloud.Account.Cookies;
-            request.Method = "GET";
-            request.ContentType = ConstSettings.DefaultRequestType;
-            request.Accept = ConstSettings.DefaultAcceptType;
-            request.UserAgent = ConstSettings.UserAgent;
-            request.AllowReadStreamBuffering = false;
-
-            var length = _file.Size.DefaultValue;
-            if (_start != null)
+            foreach (var file in _files)
             {
-                var start = _start ?? 0;
-                var end = Math.Min(_end ?? long.MaxValue, length - 1);
-                length = end - start + 1;
+                var request = (HttpWebRequest)WebRequest.Create($"{_shard.Url}{Uri.EscapeDataString(file.FullPath)}");
+                request.Proxy = _cloud.Account.Proxy;
+                request.CookieContainer = _cloud.Account.Cookies;
+                request.Method = "GET";
+                request.ContentType = ConstSettings.DefaultRequestType;
+                request.Accept = ConstSettings.DefaultAcceptType;
+                request.UserAgent = ConstSettings.UserAgent;
+                request.AllowReadStreamBuffering = false;
 
-                request.Headers.Add("Content-Range", $"bytes {start}-{end} / {length}");
-            }
-
-            var task = Task.Factory.FromAsync(request.BeginGetResponse,
-                asyncResult => request.EndGetResponse(asyncResult), null);
-            await task.ContinueWith(
-                (t, m) =>
+                var length = file.Size.DefaultValue;
+                if (_start != null)
                 {
-                    var token = (CancellationToken)m;
-                    {
-                        try
-                        {
-                            ReadResponseAsByte(t.Result, token, _innerStream);
-                            return _innerStream;
-                        }
-                        catch (Exception ex)
-                        {
-                            return null;
-                        }
-                    }
-                },
-                _cloud.CancelToken.Token, TaskContinuationOptions.OnlyOnRanToCompletion);
+                    var start = _start ?? 0;
+                    var end = Math.Min(_end ?? long.MaxValue, length - 1);
+                    length = end - start + 1;
 
+                    request.Headers.Add("Content-Range", $"bytes {start}-{end} / {length}");
+                }
+
+                var task = Task.Factory.FromAsync(request.BeginGetResponse,
+                    asyncResult => request.EndGetResponse(asyncResult), null);
+                await task.ContinueWith(
+                    (t, m) =>
+                    {
+                        var token = (CancellationToken)m;
+                        {
+                            try
+                            {
+                                ReadResponseAsByte(t.Result, token, _innerStream);
+                                return _innerStream;
+                            }
+                            catch (Exception ex)
+                            {
+                                return null;
+                            }
+                        }
+                    },
+                    _cloud.CancelToken.Token, TaskContinuationOptions.OnlyOnRanToCompletion);
+
+            }
 
             _innerStream.Flush();
             return _innerStream;
@@ -158,7 +164,8 @@ namespace MailRuCloudApi.Api
                     return l;
                 }
 
-                return _file.Size.DefaultValue;
+                //return _files.Size.DefaultValue;
+                return _files.Sum(f => f.Size.DefaultValue);
 
             }
         }

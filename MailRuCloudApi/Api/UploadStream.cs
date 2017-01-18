@@ -18,7 +18,7 @@ namespace MailRuCloudApi.Api
         {
             _cloud = cloud;
 
-            _file = new File(destinationPath, size, FileType.SingleFile, null);
+            _file = new File(destinationPath, size, null);
             _shard = _cloud.GetShardInfo(ShardType.Upload).Result;
             _maxFileSize = _cloud.Account.Info.FileSizeLimit;
 

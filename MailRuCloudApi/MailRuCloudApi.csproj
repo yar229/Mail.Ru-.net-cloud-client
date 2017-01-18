@@ -90,6 +90,8 @@
     <Compile Include="SpecialCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShardInfo.cs" />
+    <Compile Include="SplittedCloud.cs" />
+    <Compile Include="SplittedFile.cs" />
     <Compile Include="WebDavPath.cs" />
   </ItemGroup>
   <ItemGroup />

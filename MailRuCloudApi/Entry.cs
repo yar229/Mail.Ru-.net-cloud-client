@@ -5,6 +5,8 @@
 // <author>Korolev Erast.</author>
 //-----------------------------------------------------------------------
 
+using System.Linq;
+
 namespace MailRuCloudApi
 {
     using System.Collections.Generic;
@@ -17,15 +19,13 @@ namespace MailRuCloudApi
         /// <summary>
         /// Initializes a new instance of the <see cref="Entry" /> class.
         /// </summary>
-        /// <param name="foldersCount">Number of the folders.</param>
-        /// <param name="filesCount">Number of the files.</param>
         /// <param name="folders">List of the folders.</param>
         /// <param name="files">List of the files.</param>
         /// <param name="path">The entry path on the server.</param>
-        public Entry(int foldersCount, int filesCount, IEnumerable<Folder> folders, IEnumerable<File> files, string path)
+        public Entry(IList<Folder> folders, IList<File> files, string path)
         {
-            NumberOfFolders = foldersCount;
-            NumberOfFiles = filesCount;
+            NumberOfFolders = folders.Count;
+            NumberOfFiles = files.Count;
             Folders = folders;
             Files = files;
             FullPath = path;
@@ -46,12 +46,12 @@ namespace MailRuCloudApi
         /// <summary>
         /// Gets list of the folders with their specification.
         /// </summary>
-        public IEnumerable<Folder> Folders { get; internal set; }
+        public IList<Folder> Folders { get; internal set; }
 
         /// <summary>
         /// Gets list of the files with their specification.
         /// </summary>
-        public IEnumerable<File> Files { get; internal set; }
+        public IList<File> Files { get; internal set; }
 
         /// <summary>
         /// Gets full entry path on the server.

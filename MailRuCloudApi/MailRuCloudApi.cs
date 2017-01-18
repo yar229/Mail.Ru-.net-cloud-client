@@ -38,7 +38,7 @@ namespace MailRuCloudApi
         /// </summary>
         /// <param name="path">Path in the cloud to return the list of the items.</param>
         /// <returns>List of the items.</returns>
-        public async Task<Entry> GetItems(string path)
+        public virtual async Task<Entry> GetItems(string path)
         {
             var data = await new FolderInfoRequest(CloudApi, path).MakeRequestAsync();
             var entry = data.ToEntry();

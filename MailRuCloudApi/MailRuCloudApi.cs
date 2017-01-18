@@ -21,7 +21,6 @@ namespace MailRuCloudApi
     public class MailRuCloud
     {
 
-
         public CloudApi CloudApi { get; }
 
         /// <summary>
@@ -46,6 +45,21 @@ namespace MailRuCloudApi
             return entry;
         }
 
+
+        /// <summary>
+        /// Get disk usage for account.
+        /// </summary>
+        /// <returns>Returns Total/Free/Used size.</returns>
+        public async Task<DiskUsage> GetDiskUsage()
+        {
+            var data = await new AccountInfoRequest(CloudApi).MakeRequestAsync();
+            var res = new DiskUsage
+            {
+                Total = data.body.cloud.space.total,
+                Used = data.body.cloud.space.used
+            };
+            return res;
+        }
 
         /// <summary>
         /// Get list of files and folders from account.

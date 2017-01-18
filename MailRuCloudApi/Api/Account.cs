@@ -138,47 +138,6 @@ namespace MailRuCloudApi.Api
         }
 
         /// <summary>
-        /// Get disk usage for account.
-        /// </summary>
-        /// <returns>Returns Total/Free/Used size.</returns>
-        public async Task<DiskUsage> GetDiskUsage()
-        {
-            var data = await new AccountInfoRequest(_cloudApi).MakeRequestAsync();
-            var res = new DiskUsage
-            {
-                Total = data.body.cloud.space.total,
-                Used = data.body.cloud.space.used
-            };
-            return res;
-
-            //this.CheckAuth();
-            //var uri = new Uri(string.Format("{0}/api/v2/user/space?api=2&email={1}&token={2}", ConstSettings.CloudDomain, this.LoginName, this.AuthToken));
-            //var request = (HttpWebRequest)WebRequest.Create(uri.OriginalString);
-            //request.Proxy = this.Proxy;
-            //request.CookieContainer = this.Cookies;
-            //request.Method = "GET";
-            //request.ContentType = ConstSettings.DefaultRequestType;
-            //request.Accept = "application/json";
-            //request.UserAgent = ConstSettings.UserAgent;
-            //var task = Task.Factory.FromAsync(request.BeginGetResponse, asyncResult => request.EndGetResponse(asyncResult), null);
-            //return await task.ContinueWith((t) =>
-            //{
-            //    using (var response = t.Result as HttpWebResponse)
-            //    {
-            //        if (response.StatusCode == HttpStatusCode.OK)
-            //        {
-            //            return JsonParser.Parse(new MailRuCloud().ReadResponseAsText(response), PObject.DiskUsage) as DiskUsage;
-            //        }
-            //        else
-            //        {
-            //            throw new Exception("The disk usage statistic can't be retrieved.");
-            //        }
-            //        throw new Exception();
-            //    }
-            //});
-        }
-
-        /// <summary>
         /// Need to add this function for all calls.
         /// </summary>
         internal void CheckAuth()

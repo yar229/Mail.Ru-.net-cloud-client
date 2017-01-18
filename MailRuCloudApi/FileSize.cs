@@ -17,7 +17,6 @@ namespace MailRuCloudApi
         public FileSize(long defaultValue) : this()
         {
             _defValue = defaultValue;
-            SetNormalizedValue();
         }
 
         /// <summary>
@@ -31,50 +30,6 @@ namespace MailRuCloudApi
         /// <value>File size.</value>
         public long DefaultValue => _defValue;
 
-        /// <summary>
-        /// Gets normalized  file size, auto detect storage unit.
-        /// </summary>
-        /// <value>File size.</value>
-        public float NormalizedValue { get; private set; }
-
-        /// <summary>
-        /// Gets auto detected storage unit by normalized value.
-        /// </summary>
-        public StorageUnit NormalizedType { get; private set; }
-
-
-
-        /// <summary>
-        /// Normalized value detection and auto detection storage unit.
-        /// </summary>
-        private void SetNormalizedValue()
-        {
-            if (_defValue < 1024L)
-            {
-                NormalizedType = StorageUnit.Byte;
-                NormalizedValue = _defValue;
-            }
-            else if (_defValue >= 1024L && _defValue < 1024L * 1024L)
-            {
-                NormalizedType = StorageUnit.Kb;
-                NormalizedValue = _defValue / 1024f;
-            }
-            else if (_defValue >= 1024L * 1024L && _defValue < 1024L * 1024L * 1024L)
-            {
-                NormalizedType = StorageUnit.Mb;
-                NormalizedValue = _defValue / 1024f / 1024f;
-            }
-            else if (_defValue >= 1024L * 1024L * 1024L && _defValue < 1024L * 1024L * 1024L * 1024L)
-            {
-                NormalizedType = StorageUnit.Gb;
-                NormalizedValue = _defValue / 1024f / 1024f / 1024f;
-            }
-            else
-            {
-                NormalizedType = StorageUnit.Tb;
-                NormalizedValue = _defValue / 1024f / 1024f / 1024f / 1024f;
-            }
-        }
 
         #region == Equality ===================================================================================================================
         public static implicit operator FileSize(long defaultValue)

@@ -22,13 +22,13 @@ namespace MailRuCloudApi
         /// <param name="folders">List of the folders.</param>
         /// <param name="files">List of the files.</param>
         /// <param name="path">The entry path on the server.</param>
-        public Entry(int foldersCount, int filesCount, List<Folder> folders, List<File> files, string path)
+        public Entry(int foldersCount, int filesCount, IEnumerable<Folder> folders, IEnumerable<File> files, string path)
         {
-            this.NumberOfFolders = foldersCount;
-            this.NumberOfFiles = filesCount;
-            this.Folders = folders;
-            this.Files = files;
-            this.FullPath = path;
+            NumberOfFolders = foldersCount;
+            NumberOfFiles = filesCount;
+            Folders = folders;
+            Files = files;
+            FullPath = path;
         }
 
         /// <summary>
@@ -46,12 +46,12 @@ namespace MailRuCloudApi
         /// <summary>
         /// Gets list of the folders with their specification.
         /// </summary>
-        public List<Folder> Folders { get; internal set; }
+        public IEnumerable<Folder> Folders { get; internal set; }
 
         /// <summary>
         /// Gets list of the files with their specification.
         /// </summary>
-        public List<File> Files { get; internal set; }
+        public IEnumerable<File> Files { get; internal set; }
 
         /// <summary>
         /// Gets full entry path on the server.

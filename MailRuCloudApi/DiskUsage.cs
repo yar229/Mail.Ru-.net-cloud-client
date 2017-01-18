@@ -15,12 +15,12 @@ namespace MailRuCloudApi
         /// <summary>
         /// Gets total disk size.
         /// </summary>
-        public FileSize Total { get; internal set; }
+        public FileSize Total { get; set; }
 
         /// <summary>
         /// Gets used disk size.
         /// </summary>
-        public FileSize Used { get; internal set; }
+        public FileSize Used { get; set; }
 
         /// <summary>
         /// Gets free disk size.

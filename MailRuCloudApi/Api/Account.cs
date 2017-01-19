@@ -70,7 +70,7 @@ namespace MailRuCloudApi.Api
         /// <returns>True or false result operation.</returns>
         public bool Login()
         {
-            return this.LoginAsync().Result;
+            return LoginAsync().Result;
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace MailRuCloudApi.Api
                             throw new Exception();
                         }
 
-                        if (this.Cookies != null && this.Cookies.Count > 0)
+                        if (Cookies != null && Cookies.Count > 0)
                         {
                             await EnsureSdcCookie();
                             var token = await GetAuthToken();
@@ -171,9 +171,9 @@ namespace MailRuCloudApi.Api
             {
                 using (var response = t.Result as HttpWebResponse)
                 {
-                    if (response.StatusCode != HttpStatusCode.OK)
+                    if (null == response || response.StatusCode != HttpStatusCode.OK)
                     {
-                        throw new Exception();
+                        throw new Exception("Response is null or wrong status");
                     }
                 }
             });

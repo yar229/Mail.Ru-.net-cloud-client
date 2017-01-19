@@ -39,7 +39,6 @@ namespace MailRuCloudApi.Api
         /// </summary>
         /// <param name="shardType">Shard type as numeric type.</param>
         /// <param name="useAnonymousUser">To get anonymous user.</param>
-        /// <param name="cookie">Generated cookie.</param>
         /// <returns>Shard info.</returns>
         public async Task<ShardInfo> GetShardInfo(ShardType shardType, bool useAnonymousUser = false)
         {

@@ -110,7 +110,7 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Copy(Folder folder, string destinationPath)
         {
-            return !string.IsNullOrEmpty(await MoveOrCopy(folder.Name, folder.FullPath, destinationPath, false));
+            return !string.IsNullOrEmpty(await MoveOrCopy(folder.FullPath, destinationPath, false));
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Copy(File file, string destinationPath)
         {
-            var result = !string.IsNullOrEmpty(await MoveOrCopy(file.Name, file.FullPath, destinationPath, false));
+            var result = !string.IsNullOrEmpty(await MoveOrCopy(file.FullPath, destinationPath, false));
 
             return result;
         }
@@ -210,7 +210,7 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Move(Folder folder, string destinationPath)
         {
-            return !string.IsNullOrEmpty(await MoveOrCopy(folder.Name, folder.FullPath, destinationPath, true));
+            return !string.IsNullOrEmpty(await MoveOrCopy(folder.FullPath, destinationPath, true));
         }
 
         /// <summary>
@@ -243,7 +243,7 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Move(File file, string destinationPath)
         {
-            var result = !string.IsNullOrEmpty(await MoveOrCopy(file.Name, file.FullPath, destinationPath, true));
+            var result = !string.IsNullOrEmpty(await MoveOrCopy(file.FullPath, destinationPath, true));
             return result;
         }
 
@@ -329,14 +329,13 @@ namespace MailRuCloudApi
         /// <summary>
         /// Move or copy item on server.
         /// </summary>
-        /// <param name="sourceName">Source file or path name.</param>
         /// <param name="sourceFullPath">Full path source or file name.</param>
         /// <param name="destinationPath">Destination path to cope or move.</param>
         /// <param name="move">Move or copy operation.</param>
         /// <returns>New created file name.</returns>
-        private async Task<string> MoveOrCopy(string sourceName, string sourceFullPath, string destinationPath, bool move)
+        private async Task<string> MoveOrCopy(string sourceFullPath, string destinationPath, bool move)
         {
-            var data = await new MoveOrCopyRequest(CloudApi, sourceName, sourceFullPath, destinationPath, move)
+            var data = await new MoveOrCopyRequest(CloudApi, sourceFullPath, destinationPath, move)
                 .MakeRequestAsync();
             return data.ToString();
         }

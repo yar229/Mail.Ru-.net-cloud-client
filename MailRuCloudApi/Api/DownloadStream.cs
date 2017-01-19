@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -39,6 +38,7 @@ namespace MailRuCloudApi.Api
         {
             _innerStream = new RingBufferedStream(InnerBufferSize);
 
+            // ReSharper disable once UnusedVariable
             var t = GetFileStream();
         }
 
@@ -79,7 +79,7 @@ namespace MailRuCloudApi.Api
                                 ReadResponseAsByte(t.Result, token, _innerStream);
                                 return _innerStream;
                             }
-                            catch (Exception ex)
+                            catch (Exception)
                             {
                                 return null;
                             }

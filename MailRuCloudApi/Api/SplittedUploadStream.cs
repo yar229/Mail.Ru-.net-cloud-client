@@ -135,40 +135,40 @@ namespace MailRuCloudApi.Api
         }
 
 
-        uint CalculateCrc(uint crc, byte[] buffer, int offset, int count)
-        {
-            unchecked
-            {
-                for (int i = offset, end = offset + count; i < end; i++)
-                    crc = (crc >> 8) ^ CrcTable[(crc ^ buffer[i]) & 0xFF];
-            }
-            return crc;
-        }
+        //uint CalculateCrc(uint crc, byte[] buffer, int offset, int count)
+        //{
+        //    unchecked
+        //    {
+        //        for (int i = offset, end = offset + count; i < end; i++)
+        //            crc = (crc >> 8) ^ CrcTable[(crc ^ buffer[i]) & 0xFF];
+        //    }
+        //    return crc;
+        //}
 
-        private static readonly uint[] CrcTable = GenerateTable();
+        //private static readonly uint[] CrcTable = GenerateTable();
 
-        private static uint[] GenerateTable()
-        {
-            unchecked
-            {
-                uint[] table = new uint[256];
+        //private static uint[] GenerateTable()
+        //{
+        //    unchecked
+        //    {
+        //        uint[] table = new uint[256];
 
-                const uint poly = 0xEDB88320;
-                for (uint i = 0; i < table.Length; i++)
-                {
-                    var crc = i;
-                    for (int j = 8; j > 0; j--)
-                    {
-                        if ((crc & 1) == 1) crc = (crc >> 1) ^ poly;
-                        else crc >>= 1;
-                    }
-                    table[i] = crc;
-                }
+        //        const uint poly = 0xEDB88320;
+        //        for (uint i = 0; i < table.Length; i++)
+        //        {
+        //            var crc = i;
+        //            for (int j = 8; j > 0; j--)
+        //            {
+        //                if ((crc & 1) == 1) crc = (crc >> 1) ^ poly;
+        //                else crc >>= 1;
+        //            }
+        //            table[i] = crc;
+        //        }
 
-                return table;
-            }
+        //        return table;
+        //    }
 
-        }
+        //}
 
 
         public override bool CanRead => true;

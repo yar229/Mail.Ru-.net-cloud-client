@@ -60,7 +60,7 @@ namespace MailRuCloudApi.Api.Requests
                     throw new RequestException("zzzzzzzzzzzzzzz"); // Let's throw exception. It's server fault
 
                 var responseText = ReadResponseAsText(response, CloudApi.CancelToken.Token); //await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                var result = DeserializeMessage<T>(responseText);
+                var result = DeserializeMessage(responseText);
                 if (!result.Ok || response.StatusCode != HttpStatusCode.OK)
                 {
                     var exceptionMessage = $"Request failed (status code {(int)response.StatusCode}): {result.Description}";
@@ -83,7 +83,7 @@ namespace MailRuCloudApi.Api.Requests
         }
 
 
-        protected RequestResponse<T> DeserializeMessage<T>(string json) where T : class
+        protected RequestResponse<T> DeserializeMessage(string json)
         {
 
             var msg = new RequestResponse<T>
@@ -119,24 +119,26 @@ namespace MailRuCloudApi.Api.Requests
 
             int totalBytesRead = 0;
 
-            using (var reader = new BinaryReader(resp.GetResponseStream()))
-            {
-                int bytesRead;
-                while ((bytesRead = reader.Read(fileBytes, totalBytesRead, totalBufSize - totalBytesRead)) > 0)
+            var responseStream = resp.GetResponseStream();
+            if (responseStream != null)
+                using (var reader = new BinaryReader(responseStream))
                 {
-                    token.ThrowIfCancellationRequested();
-
-                    outputStream?.Write(fileBytes, totalBytesRead, bytesRead);
-
-                    totalBytesRead += bytesRead;
-
-                    if ((totalBufSize - totalBytesRead) == 0)
+                    int bytesRead;
+                    while ((bytesRead = reader.Read(fileBytes, totalBytesRead, totalBufSize - totalBytesRead)) > 0)
                     {
-                        totalBufSize += bufSizeChunk;
-                        Array.Resize(ref fileBytes, totalBufSize);
+                        token.ThrowIfCancellationRequested();
+
+                        outputStream?.Write(fileBytes, totalBytesRead, bytesRead);
+
+                        totalBytesRead += bytesRead;
+
+                        if (totalBufSize - totalBytesRead == 0)
+                        {
+                            totalBufSize += bufSizeChunk;
+                            Array.Resize(ref fileBytes, totalBufSize);
+                        }
                     }
                 }
-            }
         }
     }
 }

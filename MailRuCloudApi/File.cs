@@ -82,7 +82,6 @@ namespace MailRuCloudApi
             {
                 int index = FullPath.LastIndexOf(Name, StringComparison.Ordinal);
                 string s = index >= 0 ? FullPath.Substring(0, index) : FullPath;
-                //if (s.Length > 1 && s.EndsWith("/")) s = s.Remove(s.Length - 1, 1);
                 return s;
             }
         }
@@ -92,11 +91,6 @@ namespace MailRuCloudApi
         /// </summary>
         /// <value>Public link.</value>
         public string PublicLink { get; internal set; }
-
-        /// <summary>
-        /// Gets last modified time of file in UTC format.
-        /// </summary>
-        public DateTime LastModifiedTimeUTC { get; internal set; }
 
         public virtual List<File> Files => new List<File> {this};
 

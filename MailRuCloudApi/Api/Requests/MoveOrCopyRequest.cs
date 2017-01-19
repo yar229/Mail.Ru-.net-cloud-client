@@ -6,14 +6,12 @@ namespace MailRuCloudApi.Api.Requests
 {
     class MoveOrCopyRequest : BaseRequest<MoveOrCopyResult>
     {
-        private readonly string _sourceName;
         private readonly string _sourceFullPath;
         private readonly string _destinationPath;
         private readonly bool _move;
 
-        public MoveOrCopyRequest(CloudApi cloudApi, string sourceName, string sourceFullPath, string destinationPath, bool move) : base(cloudApi)
+        public MoveOrCopyRequest(CloudApi cloudApi, string sourceFullPath, string destinationPath, bool move) : base(cloudApi)
         {
-            _sourceName = sourceName;
             _sourceFullPath = sourceFullPath;
             _destinationPath = destinationPath;
             _move = move;

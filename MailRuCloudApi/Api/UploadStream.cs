@@ -129,7 +129,7 @@ namespace MailRuCloudApi.Api
                                     var s = t.Result;
                                     WriteBytesInStream(zbuffer, s, token, zcount);
                                 }
-                                catch (Exception ex)
+                                catch (Exception)
                                 {
                                     return null;
                                 }
@@ -149,7 +149,7 @@ namespace MailRuCloudApi.Api
                          var s = t.Result;
                          WriteBytesInStream(_endBoundaryRequest, s, token, _endBoundaryRequest.Length);
                      }
-                     catch (Exception ex)
+                     catch (Exception)
                      {
                          return false;
                      }

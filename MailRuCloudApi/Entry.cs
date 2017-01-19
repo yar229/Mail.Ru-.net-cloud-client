@@ -5,8 +5,6 @@
 // <author>Korolev Erast.</author>
 //-----------------------------------------------------------------------
 
-using System.Linq;
-
 namespace MailRuCloudApi
 {
     using System.Collections.Generic;

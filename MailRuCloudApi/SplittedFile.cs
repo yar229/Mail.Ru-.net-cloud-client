@@ -7,12 +7,6 @@ namespace MailRuCloudApi
 {
     public class SplittedFile : File
     {
-        private SplittedFile(string fullPath, long size, string hash) : base(fullPath, size, hash)
-        {
-        }
-
-        //private const string HeaderSuffix = ".wdmrc.crc";
-
         public SplittedFile(IList<File> files)
         {
             FileHeader = files.First(f => !Regex.Match(f.Name, @".wdmrc.\d\d\d\Z").Success);

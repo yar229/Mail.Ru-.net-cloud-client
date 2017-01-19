@@ -11,16 +11,16 @@ namespace MailRuCloudApi
         {
         }
 
-        private const string HeaderSuffix = ".wdmrc.crc";
+        //private const string HeaderSuffix = ".wdmrc.crc";
 
         public SplittedFile(IList<File> files)
         {
-            FileHeader = files.First(f => f.Name.EndsWith(HeaderSuffix));
+            FileHeader = files.First(f => !Regex.Match(f.Name, @".wdmrc.\d\d\d\Z").Success);
             FileParts.AddRange(files
                 .Where(f => Regex.Match(f.Name, @".wdmrc.\d\d\d\Z").Success)
                 .OrderBy(f => f.Name));
 
-            FullPath = WebDavPath.Combine(FileHeader.Path, FileHeader.Name.Substring(0, FileHeader.Name.Length - HeaderSuffix.Length));
+            FullPath = FileHeader.FullPath; //FullPath = WebDavPath.Combine(FileHeader.Path, FileHeader.Name.Substring(0, FileHeader.Name.Length - HeaderSuffix.Length));
         }
 
 

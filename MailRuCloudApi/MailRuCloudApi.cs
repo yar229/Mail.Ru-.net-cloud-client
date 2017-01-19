@@ -306,7 +306,7 @@ namespace MailRuCloudApi
 
         public Stream GetFileUploadStream(string destinationPath, string extension, long size)
         {
-            var stream = new UploadStream(destinationPath, CloudApi, size);
+            var stream = new SplittedUploadStream(destinationPath, CloudApi, size);
 
             return stream;
         }

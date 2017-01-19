@@ -5,7 +5,6 @@
 // <author>Korolev Erast.</author>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api;
@@ -258,9 +257,14 @@ namespace MailRuCloudApi
         /// </summary>
         /// <param name="file">File info.</param>
         /// <returns>True or false operation result.</returns>
-        public async Task<bool> Remove(File file)
+        public virtual async Task<bool> Remove(File file)
         {
+            foreach (var fileFile in file.Files)
+            {
+                await Remove(fileFile.FullPath);
+            }
             var result = await Remove(file.FullPath);
+
             return result;
         }
 
@@ -291,9 +295,9 @@ namespace MailRuCloudApi
         }
 
 
-        public  Stream GetFileUploadStream(string destinationPath, string extension, long size)
+        public Stream GetFileUploadStream(string destinationPath, string extension, long size)
         {
-            var stream = new SplittedUploadStream(destinationPath, CloudApi, size);
+            var stream = new UploadStream(destinationPath, CloudApi, size);
 
             return stream;
         }
@@ -328,7 +332,7 @@ namespace MailRuCloudApi
             return data.ToString();
         }
 
- 
+
         /// <summary>
         /// Remove file or folder.
         /// </summary>

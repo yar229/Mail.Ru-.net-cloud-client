@@ -167,7 +167,16 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Rename(File file, string newFileName)
         {
-            var result = await Rename(file.FullPath, newFileName);
+            var result = await Rename(file.FullPath, newFileName);  //var result = await Rename(file.FullPath, newFileName);
+            if (file.Files.Count > 1)
+            {
+                foreach (var splitFile in file.Files)
+                {
+                    string newSplitName = newFileName + ".wdmrc" + splitFile.Extension; //TODO: refact with .wdmrc
+                    await Rename(splitFile.FullPath, newSplitName);
+                }
+            }
+
             return result;
         }
 

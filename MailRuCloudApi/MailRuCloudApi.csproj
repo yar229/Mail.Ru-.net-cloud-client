@@ -54,6 +54,7 @@
     <Compile Include="Api\Account.cs" />
     <Compile Include="Api\ConstSettings.cs" />
     <Compile Include="Api\DownloadStream.cs" />
+    <Compile Include="Api\SplittedUploadStream.cs" />
     <Compile Include="Api\UploadStream.cs" />
     <Compile Include="DiskUsage.cs" />
     <Compile Include="Entry.cs" />
@@ -90,6 +91,8 @@
     <Compile Include="SpecialCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShardInfo.cs" />
+    <Compile Include="SplittedCloud.cs" />
+    <Compile Include="SplittedFile.cs" />
     <Compile Include="WebDavPath.cs" />
   </ItemGroup>
   <ItemGroup />

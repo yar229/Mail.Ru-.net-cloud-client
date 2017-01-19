@@ -38,7 +38,7 @@ namespace MailRuCloudApi
         /// </summary>
         /// <param name="path">Path in the cloud to return the list of the items.</param>
         /// <returns>List of the items.</returns>
-        public async Task<Entry> GetItems(string path)
+        public virtual async Task<Entry> GetItems(string path)
         {
             var data = await new FolderInfoRequest(CloudApi, path).MakeRequestAsync();
             var entry = data.ToEntry();
@@ -167,7 +167,16 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public async Task<bool> Rename(File file, string newFileName)
         {
-            var result = await Rename(file.FullPath, newFileName);
+            var result = await Rename(file.FullPath, newFileName);  //var result = await Rename(file.FullPath, newFileName);
+            if (file.Files.Count > 1)
+            {
+                foreach (var splitFile in file.Files)
+                {
+                    string newSplitName = newFileName + ".wdmrc" + splitFile.Extension; //TODO: refact with .wdmrc
+                    await Rename(splitFile.FullPath, newSplitName);
+                }
+            }
+
             return result;
         }
 
@@ -257,9 +266,14 @@ namespace MailRuCloudApi
         /// </summary>
         /// <param name="file">File info.</param>
         /// <returns>True or false operation result.</returns>
-        public async Task<bool> Remove(File file)
+        public virtual async Task<bool> Remove(File file)
         {
+            foreach (var fileFile in file.Files)
+            {
+                await Remove(fileFile.FullPath);
+            }
             var result = await Remove(file.FullPath);
+
             return result;
         }
 
@@ -284,13 +298,13 @@ namespace MailRuCloudApi
 
         public async Task<Stream> GetFileDownloadStream(File file, long? start, long? end)
         {
-            var task = Task.FromResult(new DownloadStream(file, CloudApi, start, end));
+            var task = Task.FromResult(new DownloadStream(file.Files, CloudApi, start, end));
             Stream stream = await task;
             return stream;
         }
 
 
-        public  Stream GetFileUploadStream(string destinationPath, string extension, long size)
+        public Stream GetFileUploadStream(string destinationPath, string extension, long size)
         {
             var stream = new UploadStream(destinationPath, CloudApi, size);
 
@@ -327,7 +341,7 @@ namespace MailRuCloudApi
             return data.ToString();
         }
 
- 
+
         /// <summary>
         /// Remove file or folder.
         /// </summary>

@@ -18,30 +18,21 @@ namespace MailRuCloudApi.Api
         {
             _cloud = cloud;
 
-            _file = new File(destinationPath, size, FileType.SingleFile, null);
+            _file = new File(destinationPath, size, null);
             _shard = _cloud.GetShardInfo(ShardType.Upload).Result;
-            _maxFileSize = _cloud.Account.Info.FileSizeLimit;
 
             Initialize();
         }
 
         private HttpWebRequest _request;
         private byte[] _endBoundaryRequest;
-        private readonly long _maxFileSize;
 
 
 
         private void Initialize()
         {
-            long allowedSize = _maxFileSize - BytesCount(_file.Name);
-            if (_file.Size.DefaultValue > allowedSize)
-            {
-                throw new OverflowException("Not supported file size.", new Exception($"The maximum file size is {allowedSize} byte. Currently file size is {_file.Size.DefaultValue} bytes + {BytesCount(_file.Name)} bytes for filename."));
-            }
-
-            var boundary = Guid.NewGuid();
-
             //// Boundary request building.
+            var boundary = Guid.NewGuid();
             var boundaryBuilder = new StringBuilder();
             boundaryBuilder.AppendFormat("------{0}\r\n", boundary);
             boundaryBuilder.AppendFormat("Content-Disposition: form-data; name=\"file\"; filename=\"{0}\"\r\n", Uri.EscapeDataString(_file.Name));
@@ -181,7 +172,8 @@ namespace MailRuCloudApi.Api
                              _file.Hash = hashResult;
                              _file.Size = sizeResult;
 
-                             return AddFileInCloud(_file).Result;
+                             var res = AddFileInCloud(_file).Result;
+                             return res;
                          }
                      }
 

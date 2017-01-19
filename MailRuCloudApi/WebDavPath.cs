@@ -1,4 +1,6 @@
-﻿namespace MailRuCloudApi
+﻿using System;
+
+namespace MailRuCloudApi
 {
     public static class WebDavPath
     {
@@ -18,5 +20,12 @@
             return path.Replace("\\", "/");
         }
 
+        public static string Parent(string path)
+        {
+            int pos = path.LastIndexOf("/", StringComparison.Ordinal);
+            return pos > 0
+                ? path.Substring(0, pos)
+                : path;
+        }
     }
 }

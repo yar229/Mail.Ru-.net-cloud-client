@@ -6,48 +6,36 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 
 namespace MailRuCloudApi
 {
-    using System;
-
-    /// <summary>
-    /// Cloud file type.
-    /// </summary>
-    public enum FileType
-    {
-        /// <summary>
-        /// File as single file.
-        /// </summary>
-        SingleFile = 0,
-
-        /// <summary>
-        /// File composed from several pieces, this file type has not hash and public link.
-        /// </summary>
-        MultiFile = 1
-    }
-
     /// <summary>
     /// Server file info.
     /// </summary>
     public class File
     {
-        public File(string fullPath, long size, FileType fileType, string hash)
+        protected File()
+        {
+        }
+
+        public File(string fullPath, long size, string hash)
         {
             FullPath = fullPath;
-            Size = size;
-            Type = fileType;
-            Hash = hash;
+            _size = size;
+            _hash = hash;
         }
 
 
         private string _fullPath;
+        private FileSize _size;
+        private string _hash;
 
         /// <summary>
         /// Gets file name.
         /// </summary>
         /// <value>File name.</value>
-        public string Name => FullPath.Substring(FullPath.LastIndexOf("/", StringComparison.Ordinal) + 1);
+        public virtual string Name => FullPath.Substring(FullPath.LastIndexOf("/", StringComparison.Ordinal) + 1);
 
         public string Extension => System.IO.Path.GetExtension(Name);
 
@@ -55,13 +43,21 @@ namespace MailRuCloudApi
         /// Gets file hash value.
         /// </summary>
         /// <value>File hash.</value>
-        public string Hash { get; internal set; }
+        public virtual string Hash
+        {
+            get { return _hash; }
+            internal set { _hash = value; }
+        }
 
         /// <summary>
         /// Gets file size.
         /// </summary>
         /// <value>File size.</value>
-        public FileSize Size { get; internal set; }
+        public virtual FileSize Size
+        {
+            get { return _size; }
+            internal set { _size = value; }
+        }
 
         /// <summary>
         /// Gets full file path with name in server.
@@ -98,14 +94,11 @@ namespace MailRuCloudApi
         public string PublicLink { get; internal set; }
 
         /// <summary>
-        /// Gets cloud file type.
-        /// </summary>
-        public FileType Type { get; internal set; }
-
-        /// <summary>
         /// Gets last modified time of file in UTC format.
         /// </summary>
         public DateTime LastModifiedTimeUTC { get; internal set; }
+
+        public virtual List<File> Files => new List<File> {this};
 
         /// <summary>
         /// Gets or sets base file name.
@@ -118,8 +111,8 @@ namespace MailRuCloudApi
         /// <value>File size.</value>
         internal FileSize PrimarySize => Size;
 
-        public DateTime CreationTimeUtc { get; set; }
-        public DateTime LastWriteTimeUtc { get; set; }
-        public DateTime LastAccessTimeUtc { get; set; }
+        public virtual DateTime CreationTimeUtc { get; set; }
+        public virtual DateTime LastWriteTimeUtc { get; set; }
+        public virtual DateTime LastAccessTimeUtc { get; set; }
     }
 }

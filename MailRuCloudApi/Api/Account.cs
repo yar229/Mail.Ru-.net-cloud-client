@@ -30,6 +30,9 @@ namespace MailRuCloudApi.Api
             _cloudApi = cloudApi;
             LoginName = login;
             Password = password;
+
+            WebRequest.DefaultWebProxy.Credentials = CredentialCache.DefaultCredentials;
+            Proxy = WebRequest.DefaultWebProxy;
         }
 
         /// <summary>
@@ -88,10 +91,6 @@ namespace MailRuCloudApi.Api
             {
                 throw new ArgumentException("Password is null or empty.");
             }
-
-            WebRequest.DefaultWebProxy.Credentials = CredentialCache.DefaultCredentials;
-            Proxy = WebRequest.DefaultWebProxy;
-
 
             string reqString = $"Login={LoginName}&Domain={ConstSettings.Domain}&Password={Password}";
             byte[] requestData = Encoding.UTF8.GetBytes(reqString);

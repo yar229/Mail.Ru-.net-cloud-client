@@ -14,6 +14,8 @@ namespace MailRuCloudApi
         {
             Entry entry = await base.GetItems(path);
 
+            if (null == entry) return null;
+
             var groupedFiles = entry.Files
                 .GroupBy(f => Regex.Match(f.Name, @"(?<name>.*?)(\.wdmrc\.(crc|\d\d\d))?\Z").Groups["name"].Value, file => file)
                 .Select(group => group.Count() == 1

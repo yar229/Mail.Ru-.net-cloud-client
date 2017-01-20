@@ -21,7 +21,7 @@ namespace MailRuCloudApi
                     : new SplittedFile(group.ToList()))
                 .ToList();
 
-            var newEntry = new Entry(entry.Folders, groupedFiles, path);
+            var newEntry = new Entry(entry.Folders, groupedFiles, entry.FullPath);
 
             return newEntry;
         }

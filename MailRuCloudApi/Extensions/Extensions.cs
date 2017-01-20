@@ -1,16 +1,9 @@
 ﻿using System;
-using System.Text;
 
-namespace MailRuCloudApi
+namespace MailRuCloudApi.Extensions
 {
     public static class Extensions
     {
-        public static long BytesCount(this string value)
-        {
-            return Encoding.UTF8.GetByteCount(value);
-        }
-
-
         /// <summary>
         /// Finds the first exception of the requested type.
         /// </summary>
@@ -46,9 +39,7 @@ namespace MailRuCloudApi
         public static Exception InnerOf(this Exception ex, Type t)
         {
             if (ex == null || t.IsInstanceOfType(ex))
-            {
                 return ex;
-            }
 
             var ae = ex as AggregateException;
             if (ae != null)
@@ -57,12 +48,9 @@ namespace MailRuCloudApi
                 {
                     var ret = InnerOf(e, t);
                     if (ret != null)
-                    {
                         return ret;
-                    }
                 }
             }
-
             return InnerOf(ex.InnerException, t);
         }
     }

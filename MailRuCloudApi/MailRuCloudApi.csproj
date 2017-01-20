@@ -50,33 +50,52 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Account.cs" />
     <Compile Include="AccountInfo.cs" />
-    <Compile Include="ConstSettings.cs">
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="DownloadStream.cs" />
+    <Compile Include="Api\Account.cs" />
+    <Compile Include="Api\ConstSettings.cs" />
+    <Compile Include="Api\DownloadStream.cs" />
+    <Compile Include="Api\SplittedUploadStream.cs" />
+    <Compile Include="Api\UploadStream.cs" />
     <Compile Include="DiskUsage.cs" />
     <Compile Include="Entry.cs" />
-    <Compile Include="Extensions.cs" />
+    <Compile Include="Extensions\DtoImport.cs" />
+    <Compile Include="Extensions\Extensions.cs" />
     <Compile Include="File.cs" />
     <Compile Include="FileSize.cs" />
     <Compile Include="Folder.cs" />
-    <Compile Include="JsonParser.cs" />
     <Compile Include="MailRuCloudApi.cs" />
-    <Compile Include="Quota.cs" />
-    <Compile Include="RingBufferedStream.cs" />
+    <Compile Include="Api\CloudApi.cs" />
+    <Compile Include="Api\Requests\AccountInfoRequest.cs" />
+    <Compile Include="Api\Requests\AuthTokenRequest.cs" />
+    <Compile Include="Api\Requests\CloneItemRequest.cs" />
+    <Compile Include="Api\Requests\CreateFileRequest.cs" />
+    <Compile Include="Api\Requests\CreateFolderRequest.cs" />
+    <Compile Include="Api\Requests\EnsureSdcCookieRequest.cs" />
+    <Compile Include="Api\Requests\FolderInfoRequest.cs" />
+    <Compile Include="Api\Requests\BaseRequest.cs" />
+    <Compile Include="Api\Requests\MoveOrCopyRequest.cs" />
+    <Compile Include="Api\Requests\RemoveRequest.cs" />
+    <Compile Include="Api\Requests\RenameRequest.cs" />
+    <Compile Include="Api\Requests\ShardInfoRequest.cs" />
+    <Compile Include="Api\Requests\Types\AccountInfoResult.cs" />
+    <Compile Include="Api\Requests\Types\AuthTokenResult.cs" />
+    <Compile Include="Api\Requests\Types\CloneItemResult.cs" />
+    <Compile Include="Api\Requests\Types\FolderInfoResult.cs" />
+    <Compile Include="Api\Requests\RequestException.cs" />
+    <Compile Include="Api\Requests\RequestResponse.cs" />
+    <Compile Include="Api\Requests\Types\MoveOrCopyResult.cs" />
+    <Compile Include="Api\Requests\Types\ShardInfoResult.cs" />
+    <Compile Include="Api\Requests\Types\UnknownResult.cs" />
+    <Compile Include="Api\RingBufferedStream.cs" />
+    <Compile Include="ShardType.cs" />
     <Compile Include="SpecialCommand.cs" />
-    <Compile Include="StorageUnit.cs" />
-    <Compile Include="UploadStream.cs" />
-    <Compile Include="MultiFile.cs" />
-    <Compile Include="MultiFilePart.cs">
-      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ProgressChangeTaskState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShardInfo.cs" />
+    <Compile Include="SplittedCloud.cs" />
+    <Compile Include="SplittedFile.cs" />
+    <Compile Include="WebDavPath.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

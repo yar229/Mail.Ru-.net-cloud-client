@@ -1,18 +1,8 @@
-﻿//-----------------------------------------------------------------------
-// <created file="ConstSettings.cs">
-//     Mail.ru cloud client created in 2016.
-// </created>
-// <author>Korolev Erast.</author>
-//-----------------------------------------------------------------------
+﻿using System;
+using System.Collections.Generic;
 
-namespace MailRuCloudApi
+namespace MailRuCloudApi.Api
 {
-    using System;
-    using System.Collections.Generic;
-
-    /// <summary>
-    /// Additional class to constant values.
-    /// </summary>
     public class ConstSettings
     {
         public const string Domain = "mail.ru";
@@ -25,7 +15,7 @@ namespace MailRuCloudApi
         public const string DefaultRequestType = "application/x-www-form-urlencoded";
 
         #region Big freaking list of mime types
-        private static IDictionary<string, string> MimeTypesList = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase) {
+        private static readonly IDictionary<string, string> MimeTypesList = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase) {
         // combination of values from Windows 7 Registry and 
         // from C:\Windows\System32\inetsrv\config\applicationHost.config
         // some added, including .7z and .dat
@@ -596,7 +586,7 @@ namespace MailRuCloudApi
         {
             if (extension == null)
             {
-                throw new ArgumentNullException("extension");
+                throw new ArgumentNullException(nameof(extension));
             }
 
             if (!extension.StartsWith("."))

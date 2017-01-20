@@ -4,47 +4,35 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using MailRuCloudApi.Api.Requests;
 
-namespace MailRuCloudApi
+namespace MailRuCloudApi.Api
 {
     internal class UploadStream : Stream
     {
-        private readonly ShardInfo _shard;
-        private readonly Account _account;
-        
-        private readonly CancellationTokenSource _cancelToken;
-
-
+        private readonly CloudApi _cloud;
         private readonly File _file;
+        private readonly ShardInfo _shard;
 
-        public UploadStream(string destinationPath, ShardInfo shard, Account account, CancellationTokenSource cancelToken, long size)
+        public UploadStream(string destinationPath, CloudApi cloud, long size)
         {
-            _file = new File(destinationPath, size, FileType.SingleFile, null);
+            _cloud = cloud;
 
-            _shard = shard;
-            _account = account;
-            _cancelToken = cancelToken;
-            _maxFileSize = _account.Info.FileSizeLimit;
+            _file = new File(destinationPath, size, null);
+            _shard = _cloud.GetShardInfo(ShardType.Upload).Result;
+
             Initialize();
         }
 
         private HttpWebRequest _request;
         private byte[] _endBoundaryRequest;
-        private readonly long _maxFileSize;
 
 
 
         private void Initialize()
         {
-            long allowedSize = _maxFileSize - _file.Name.BytesCount();
-            if (_file.Size.DefaultValue > allowedSize)
-            {
-                throw new OverflowException("Not supported file size.", new Exception($"The maximum file size is {allowedSize} byte. Currently file size is {_file.Size.DefaultValue} bytes + {_file.Name.BytesCount()} bytes for filename."));
-            }
-
-            var boundary = Guid.NewGuid();
-
             //// Boundary request building.
+            var boundary = Guid.NewGuid();
             var boundaryBuilder = new StringBuilder();
             boundaryBuilder.AppendFormat("------{0}\r\n", boundary);
             boundaryBuilder.AppendFormat("Content-Disposition: form-data; name=\"file\"; filename=\"{0}\"\r\n", Uri.EscapeDataString(_file.Name));
@@ -56,14 +44,13 @@ namespace MailRuCloudApi
             _endBoundaryRequest = Encoding.UTF8.GetBytes(endBoundaryBuilder.ToString());
             var boundaryRequest = Encoding.UTF8.GetBytes(boundaryBuilder.ToString());
 
-            var url = new Uri($"{_shard.Url}?cloud_domain=2&{_account.LoginName}");
+            var url = new Uri($"{_shard.Url}?cloud_domain=2&{_cloud.Account.LoginName}");
             _request = (HttpWebRequest)WebRequest.Create(url.OriginalString);
-            _request.Proxy = _account.Proxy;
-            _request.CookieContainer = _account.Cookies;
+            _request.Proxy = _cloud.Account.Proxy;
+            _request.CookieContainer = _cloud.Account.Cookies;
             _request.Method = "POST";
 
             _request.ContentLength = _file.Size.DefaultValue + boundaryRequest.LongLength + _endBoundaryRequest.LongLength;
-            //_request.SendChunked = true;
 
             _request.Referer = $"{ConstSettings.CloudDomain}/home/{Uri.EscapeDataString(_file.Path)}";
             _request.Headers.Add("Origin", ConstSettings.CloudDomain);
@@ -73,13 +60,9 @@ namespace MailRuCloudApi
             _request.UserAgent = ConstSettings.UserAgent;
             _request.AllowWriteStreamBuffering = false;
 
+            _task = Task.Factory.FromAsync(_request.BeginGetRequestStream, asyncResult => _request.EndGetRequestStream(asyncResult), null);
 
-            //_request.GetRequestStream();
-
-            _task = Task.Factory.FromAsync(_request.BeginGetRequestStream, asyncResult => _request.EndGetRequestStream(asyncResult), 
-                null);
-
-            _task =  _task.ContinueWith
+            _task = _task.ContinueWith
                 (
                             (t, m) =>
                             {
@@ -95,7 +78,7 @@ namespace MailRuCloudApi
                                 }
                                 return t.Result;
                             },
-                        _cancelToken.Token, TaskContinuationOptions.OnlyOnRanToCompletion);
+                        _cloud.CancelToken.Token, TaskContinuationOptions.OnlyOnRanToCompletion);
         }
 
         private Task<Stream> _task;
@@ -146,126 +129,78 @@ namespace MailRuCloudApi
                                     var s = t.Result;
                                     WriteBytesInStream(zbuffer, s, token, zcount);
                                 }
-                                catch (Exception ex)
+                                catch (Exception)
                                 {
                                     return null;
                                 }
 
                                 return t.Result;
                             },
-                        _cancelToken.Token, TaskContinuationOptions.OnlyOnRanToCompletion);
+                        _cloud.CancelToken.Token, TaskContinuationOptions.OnlyOnRanToCompletion);
         }
         public override void Close()
         {
+            var z = _task.ContinueWith(
+                 (t, m) =>
+                 {
+                     try
+                     {
+                         var token = (CancellationToken)m;
+                         var s = t.Result;
+                         WriteBytesInStream(_endBoundaryRequest, s, token, _endBoundaryRequest.Length);
+                     }
+                     catch (Exception)
+                     {
+                         return false;
+                     }
+                     finally
+                     {
+                         var st = t.Result;
+                         st?.Close();
+                         st?.Dispose();
+                     }
 
 
-           var z =   _task.ContinueWith(
-                (t, m) =>
-                {
-                    try
-                    {
-                        var token = (CancellationToken) m;
-                        var s = t.Result;
-                        WriteBytesInStream(_endBoundaryRequest, s, token, _endBoundaryRequest.Length);
-                    }
-                    catch (Exception ex)
-                    {
-                        return false;
-                    }
-                    finally
-                    {
-                        var st = t.Result;
-                        st?.Close();
-                        st?.Dispose();
-                    }
+                     using (var response = (HttpWebResponse)_request.GetResponse())
+                     {
+                         if (response.StatusCode == HttpStatusCode.OK)
+                         {
+                             var resp = ReadResponseAsText(response, _cloud.CancelToken).Split(';');
+                             var hashResult = resp[0];
+                             var sizeResult = long.Parse(resp[1].Trim('\r', '\n', ' '));
 
+                             _file.Hash = hashResult;
+                             _file.Size = sizeResult;
 
-                    using (var response = (HttpWebResponse)_request.GetResponse())
-                    {
-                        if (response.StatusCode == HttpStatusCode.OK)
-                        {
-                            var resp = ReadResponseAsText(response, _cancelToken).Split(';');
-                            var hashResult = resp[0];
-                            var sizeResult = long.Parse(resp[1].Trim('\r', '\n', ' '));
+                             var res = AddFileInCloud(_file).Result;
+                             return res;
+                         }
+                     }
 
-                            _file.Hash = hashResult;
-                            _file.Size.DefaultValue = sizeResult;
-
-                            return AddFileInCloud(_file).Result;
-                        }
-                    }
-
-                    return true;
-                },
-            _cancelToken.Token, TaskContinuationOptions.OnlyOnRanToCompletion);
+                     return true;
+                 },
+             _cloud.CancelToken.Token, TaskContinuationOptions.OnlyOnRanToCompletion);
 
             z.Wait();
 
             base.Close();
         }
 
-        private enum ResolveFileConflictMethod 
-        {
-            Rename,
-            Rewrite
-        }
 
-        private string GetConflictSolverParameter(ResolveFileConflictMethod conflict = ResolveFileConflictMethod.Rewrite)
-        {
-            switch (conflict)
-            {
-                case ResolveFileConflictMethod.Rewrite:
-                    return "rewrite";
-                case ResolveFileConflictMethod.Rename:
-                    return "rename";
-                default: throw new NotImplementedException("File conflict method not implemented");
-            }
-        }
+
+
 
 
         private async Task<bool> AddFileInCloud(File fileInfo, ResolveFileConflictMethod conflict = ResolveFileConflictMethod.Rewrite)
         {
-            //var hasFile = fileInfo.Hash != null && fileInfo.Size.DefaultValue != 0;
-            //var filePart = hasFile ? $"&hash={fileInfo.Hash}&size={fileInfo.Size.DefaultValue}" : string.Empty;
-            var filePart = $"&hash={fileInfo.Hash}&size={fileInfo.Size.DefaultValue}";
+            await new CreateFileRequest(_cloud, fileInfo.FullPath, fileInfo.Hash, fileInfo.Size.DefaultValue, conflict)
+                .MakeRequestAsync();
 
-            string addFileString = $"home={Uri.EscapeDataString(fileInfo.FullPath)}&conflict={GetConflictSolverParameter(conflict)}&api=2&token={_account.AuthToken}" + filePart;
-            var addFileRequest = Encoding.UTF8.GetBytes(addFileString);
-
-            //var url = new Uri($"{ConstSettings.CloudDomain}/api/v2/{(hasFile ? "file" : "folder")}/add");
-            var url = new Uri($"{ConstSettings.CloudDomain}/api/v2/file/add");
-            var request = (HttpWebRequest)WebRequest.Create(url.OriginalString);
-            request.Proxy = _account.Proxy;
-            request.CookieContainer = _account.Cookies;
-            request.Method = "POST";
-            request.ContentLength = addFileRequest.LongLength;
-            request.Referer = $"{ConstSettings.CloudDomain}/home{Uri.EscapeDataString(fileInfo.Path)}";
-            request.Headers.Add("Origin", ConstSettings.CloudDomain);
-            request.Host = url.Host;
-            request.ContentType = ConstSettings.DefaultRequestType;
-            request.Accept = "*/*";
-            request.UserAgent = ConstSettings.UserAgent;
-            var task = Task.Factory.FromAsync(request.BeginGetRequestStream, asyncResult => request.EndGetRequestStream(asyncResult), null);
-            return await task.ContinueWith(t =>
-            {
-                using (var s = t.Result)
-                {
-                    s.Write(addFileRequest, 0, addFileRequest.Length);
-                    using (var response = (HttpWebResponse)request.GetResponse())
-                    {
-                        if (response.StatusCode != HttpStatusCode.OK)
-                        {
-                            throw new Exception();
-                        }
-
-                        return true;
-                    }
-                }
-            });
+            return true;
         }
 
 
-        private string ReadResponseAsText(WebResponse resp, CancellationTokenSource cancelToken)
+        private static string ReadResponseAsText(WebResponse resp, CancellationTokenSource cancelToken)
         {
             using (var stream = new MemoryStream())
             {
@@ -282,7 +217,7 @@ namespace MailRuCloudApi
             }
         }
 
-        private void ReadResponseAsByte(WebResponse resp, CancellationToken token, Stream outputStream = null)
+        private static void ReadResponseAsByte(WebResponse resp, CancellationToken token, Stream outputStream = null)
         {
             using (Stream responseStream = resp.GetResponseStream())
             {
@@ -298,6 +233,7 @@ namespace MailRuCloudApi
         }
 
 
+        // ReSharper disable once UnusedMethodReturnValue.Local
         private long WriteBytesInStream(byte[] bytes, Stream outputStream, CancellationToken token, long length)
         {
             BufferSize -= bytes.Length;
@@ -317,7 +253,7 @@ namespace MailRuCloudApi
             var totalWritten = 0L;
             if (length < bufferLength)
             {
-                var z = sourceStream.ReadBytes((int) length);
+                var z = sourceStream.ReadBytes((int)length);
                 outputStream.Write(z, 0, (int)length);
             }
             else
@@ -336,7 +272,7 @@ namespace MailRuCloudApi
                     }
                 }
 
-                
+
             }
             return totalWritten;
         }
@@ -354,7 +290,7 @@ namespace MailRuCloudApi
 
         public override void SetLength(long value)
         {
-            _file.Size.DefaultValue = value;
+            _file.Size = value;
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -367,5 +303,10 @@ namespace MailRuCloudApi
         public override bool CanWrite => true;
         public override long Length => _file.Size.DefaultValue;
         public override long Position { get; set; }
+
+        public static long BytesCount(string value)
+        {
+            return Encoding.UTF8.GetByteCount(value);
+        }
     }
 }

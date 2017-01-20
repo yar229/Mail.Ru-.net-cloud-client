@@ -5,77 +5,64 @@
 // <author>Korolev Erast.</author>
 //-----------------------------------------------------------------------
 
+using System;
+
 namespace MailRuCloudApi
 {
     /// <summary>
     /// File size definition.
     /// </summary>
-    public class FileSize
+    public struct FileSize : IEquatable<FileSize>
     {
+        public FileSize(long defaultValue) : this()
+        {
+            _defValue = defaultValue;
+        }
+
         /// <summary>
         /// Private variable for default value.
         /// </summary>
-        private long _defValue;
+        private readonly long _defValue;
 
         /// <summary>
         /// Gets default size in bytes.
         /// </summary>
         /// <value>File size.</value>
-        public long DefaultValue
-        {
-            get
-            {
-                return _defValue;
-            }
+        public long DefaultValue => _defValue;
 
-            internal set
-            {
-                _defValue = value;
-                SetNormalizedValue();
-            }
+
+        #region == Equality ===================================================================================================================
+        public static implicit operator FileSize(long defaultValue)
+        {
+            return new FileSize(defaultValue);
         }
 
-        /// <summary>
-        /// Gets normalized  file size, auto detect storage unit.
-        /// </summary>
-        /// <value>File size.</value>
-        public float NormalizedValue { get; private set; }
-
-        /// <summary>
-        /// Gets auto detected storage unit by normalized value.
-        /// </summary>
-        public StorageUnit NormalizedType { get; private set; }
-
-        /// <summary>
-        /// Normalized value detection and auto detection storage unit.
-        /// </summary>
-        private void SetNormalizedValue()
+        public static FileSize operator +(FileSize first, FileSize second)
         {
-            if (_defValue < 1024L)
-            {
-                NormalizedType = StorageUnit.Byte;
-                NormalizedValue = (float)_defValue;
-            }
-            else if (_defValue >= 1024L && _defValue < 1024L * 1024L)
-            {
-                NormalizedType = StorageUnit.Kb;
-                NormalizedValue = (float)_defValue / 1024f;
-            }
-            else if (_defValue >= 1024L * 1024L && _defValue < 1024L * 1024L * 1024L)
-            {
-                NormalizedType = StorageUnit.Mb;
-                NormalizedValue = (float)_defValue / 1024f / 1024f;
-            }
-            else if (_defValue >= 1024L * 1024L * 1024L && _defValue < 1024L * 1024L * 1024L * 1024L)
-            {
-                NormalizedType = StorageUnit.Gb;
-                NormalizedValue = (float)_defValue / 1024f / 1024f / 1024f;
-            }
-            else
-            {
-                NormalizedType = StorageUnit.Tb;
-                NormalizedValue = (float)_defValue / 1024f / 1024f / 1024f / 1024f;
-            }
+            return new FileSize(first.DefaultValue + second.DefaultValue);
         }
+
+        public static FileSize operator -(FileSize first, FileSize second)
+        {
+            return new FileSize(first.DefaultValue - second.DefaultValue);
+        }
+
+        public bool Equals(FileSize other)
+        {
+            return _defValue == other._defValue;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((FileSize)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return _defValue.GetHashCode();
+        }
+        #endregion == Equality ===================================================================================================================
     }
 }

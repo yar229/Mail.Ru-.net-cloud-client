@@ -124,17 +124,17 @@ namespace MailRuCloudApi.Api
                             {
                                 FileSizeLimit = accdata.body.cloud.file_size_limit
                             };
+                            Expires = DateTime.Now.AddHours(23);
 
                             return token;
                         }
-                        else
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
             });
         }
+
+        public DateTime Expires { get; private set; }
 
         /// <summary>
         /// Need to add this function for all calls.

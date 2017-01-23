@@ -68,26 +68,29 @@ namespace MailRuCloudApi.Extensions
         public static Entry ToEntry(this FolderInfoResult data)
         {
             var entry = new Entry(
-               data.body.list
-                   .Where(it => it.kind == "folder")
-                   .Select(it => new Folder(it.home)
-                   {
-                       NumberOfFolders = it.count.folders,
-                       NumberOfFiles = it.count.files,
-                       Size = it.size,
-                       PublicLink = string.IsNullOrEmpty(it.weblink) ? "" : ConstSettings.PublishFileLink + it.weblink
-                   }).ToList(),
-               data.body.list
-                   .Where(it => it.kind == "file")
-                   .Select(it => new File(it.home, it.size, it.hash)
-                   {
-                       PublicLink = string.IsNullOrEmpty(it.weblink) ? "" : ConstSettings.PublishFileLink + it.weblink,
-                       PrimaryName = it.name,
-                       CreationTimeUtc = UnixTimeStampToDateTime(it.mtime),
-                       LastAccessTimeUtc = UnixTimeStampToDateTime(it.mtime),
-                       LastWriteTimeUtc = UnixTimeStampToDateTime(it.mtime),
-                   }).ToList(),
-               data.body.home);
+                    data.body.list
+                        .Where(it => it.kind == "folder")
+                        .Select(it => new Folder(it.home)
+                        {
+                            NumberOfFolders = it.count.folders,
+                            NumberOfFiles = it.count.files,
+                            Size = it.size,
+                            PublicLink =
+                                string.IsNullOrEmpty(it.weblink) ? "" : ConstSettings.PublishFileLink + it.weblink
+                        }).ToList(),
+                    data.body.list
+                        .Where(it => it.kind == "file")
+                        .Select(it => new File(it.home, it.size, it.hash)
+                        {
+                            PublicLink =
+                                string.IsNullOrEmpty(it.weblink) ? "" : ConstSettings.PublishFileLink + it.weblink,
+                            PrimaryName = it.name,
+                            CreationTimeUtc = UnixTimeStampToDateTime(it.mtime),
+                            LastAccessTimeUtc = UnixTimeStampToDateTime(it.mtime),
+                            LastWriteTimeUtc = UnixTimeStampToDateTime(it.mtime),
+                        }).ToList(),
+                    data.body.home)
+                {Size = data.body.size};
 
             return entry;
         }

@@ -55,5 +55,7 @@ namespace MailRuCloudApi
         /// Gets full entry path on the server.
         /// </summary>
         public string FullPath { get; internal set; }
+
+        public long Size { get; set; }
     }
 }

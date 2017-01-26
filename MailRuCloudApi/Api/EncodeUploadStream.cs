@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using MailRuCloudApi.Api.Crypt;
 using XTSSharp;
 
 namespace MailRuCloudApi.Api
@@ -12,42 +13,31 @@ namespace MailRuCloudApi.Api
     {
         public EncodeUploadStream(string destinationPath, CloudApi cloud, string encPassword, long size) : base(destinationPath, cloud, size)
         {
-            using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
-            {
-                rng.GetBytes(_initVector);
-            }
+            _keys = new KeyGenerator(encPassword);
 
-            byte[] salt = CreateRandomSalt(7);
-
-            PasswordDeriveBytes cdk = new PasswordDeriveBytes(encPassword, salt);
-            _secretKey = cdk.CryptDeriveKey("RC2", "SHA1", 256, _initVector);
+            //_bytesWrote = _keys.InitVector.Length;
+            //base.Write(_keys.InitVector, 0, _keys.InitVector.Length);
         }
 
-        public static byte[] CreateRandomSalt(int length)
-        {
-            var randBytes = length >= 1 ? new byte[length] : new byte[1];
+        private readonly KeyGenerator _keys;
 
-            RNGCryptoServiceProvider rand = new RNGCryptoServiceProvider();
-            rand.GetBytes(randBytes);
-            return randBytes;
-        }
 
-        private readonly byte[] _initVector = new byte[32];
-        //{
-        //        0x21, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
-        //        0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22
-        //};
+        //private readonly byte[] _initVector = new byte[32];
+        ////{
+        ////        0x21, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
+        ////        0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22
+        ////};
 
-        private readonly byte[] _secretKey; //; = new byte[32];
-        //{
-        //        0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
-        //        0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11
-        //};
+        //private readonly byte[] _secretKey; //; = new byte[32];
+        ////{
+        ////        0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
+        ////        0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11
+        ////};
 
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            var xts = XtsAes256.Create(_secretKey, _initVector);
+            var xts = XtsAes256.Create(_keys.SecretKey, _keys.InitVector);
             
 
             var plain = buffer;

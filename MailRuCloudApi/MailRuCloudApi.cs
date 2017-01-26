@@ -299,7 +299,7 @@ namespace MailRuCloudApi
         public async Task<Stream> GetFileDownloadStream(File file, long? start, long? end)
         {
             //var task = Task.FromResult(new DownloadStream(file.Files, CloudApi, start, end));
-            var task = Task.FromResult(new DecodeDownloadStream(file.Files, CloudApi, start, end));
+            var task = Task.FromResult(new DecodeDownloadStream(file.Files, CloudApi, "test", start, end));
             Stream stream = await task;
             return stream;
         }

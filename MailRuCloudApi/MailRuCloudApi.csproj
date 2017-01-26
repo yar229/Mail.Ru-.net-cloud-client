@@ -53,6 +53,7 @@
     <Compile Include="AccountInfo.cs" />
     <Compile Include="Api\Account.cs" />
     <Compile Include="Api\ConstSettings.cs" />
+    <Compile Include="Api\Crypt\KeyGenerator.cs" />
     <Compile Include="Api\DecodeDownloadStream.cs" />
     <Compile Include="Api\DownloadStream.cs" />
     <Compile Include="Api\EncodeUploadStream.cs" />

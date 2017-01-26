@@ -14,7 +14,7 @@ namespace MailRuCloudApi.Api
         private File _origfile;
 
         private int _currFileId = -1;
-        private long _bytesWrote;
+        protected long _bytesWrote;
         private UploadStream _uploadStream;
 
 

@@ -92,46 +92,25 @@ namespace MailRuCloudApi.Api
                 throw new ArgumentException("Password is null or empty.");
             }
 
-            string reqString = $"Login={LoginName}&Domain={ConstSettings.Domain}&Password={Password}";
-            byte[] requestData = Encoding.UTF8.GetBytes(reqString);
-            var request = (HttpWebRequest)WebRequest.Create($"{ConstSettings.AuthDomain}/cgi-bin/auth");
-            request.Proxy = Proxy;
-            request.CookieContainer = Cookies;
-            request.Method = "POST";
-            request.ContentType = ConstSettings.DefaultRequestType;
-            request.Accept = ConstSettings.DefaultAcceptType;
-            request.UserAgent = ConstSettings.UserAgent;
-            var task = Task.Factory.FromAsync(request.BeginGetRequestStream, asyncResult => request.EndGetRequestStream(asyncResult), null);
-            return await await task.ContinueWith(async (t) =>
+            await new LoginRequest(_cloudApi, LoginName, Password)
+                .MakeRequestAsync();
+
+            await new EnsureSdcCookieRequest(_cloudApi)
+                .MakeRequestAsync();
+
+            AuthToken = new AuthTokenRequest(_cloudApi)
+                .MakeRequestAsync()
+                .ThrowIf(data => string.IsNullOrEmpty(data.body?.token), new AuthenticationException("Empty auth token"))
+                .body.token;
+
+            Info = new AccountInfo
             {
-                using (var s = t.Result)
-                {
-                    s.Write(requestData, 0, requestData.Length);
-                    using (var response = (HttpWebResponse)request.GetResponse())
-                    {
-                        if (response.StatusCode != HttpStatusCode.OK)
-                        {
-                            throw new Exception();
-                        }
+                FileSizeLimit = new AccountInfoRequest(_cloudApi).MakeRequestAsync().Result.body.cloud.file_size_limit
+            };
 
-                        if (Cookies != null && Cookies.Count > 0)
-                        {
-                            await EnsureSdcCookie();
-                            var token = await GetAuthToken();
+            Expires = DateTime.Now.AddHours(23);
 
-                            var accdata = await new AccountInfoRequest(_cloudApi).MakeRequestAsync();
-                            Info = new AccountInfo
-                            {
-                                FileSizeLimit = accdata.body.cloud.file_size_limit
-                            };
-                            Expires = DateTime.Now.AddHours(23);
-
-                            return token;
-                        }
-                        return false;
-                    }
-                }
-            });
+            return true;
         }
 
         public DateTime Expires { get; private set; }
@@ -149,31 +128,15 @@ namespace MailRuCloudApi.Api
                     throw new AuthenticationException("Auth token has't been retrieved.");
         }
 
-        /// <summary>
-        /// Retrieve SDC cookies.
-        /// </summary>
-        /// <returns>Returns nothing. Just tusk.</returns>
-        private async Task EnsureSdcCookie()
+    }
+
+    public static class Extensions
+    {
+        public static T ThrowIf<T>(this Task<T> data, Func<T, bool> func, Exception ex)
         {
-            await new EnsureSdcCookieRequest(_cloudApi)
-                .MakeRequestAsync();
+            var res = data.Result;
+            if (func(res)) throw ex;
+            return res;
         }
-
-        /// <summary>
-        /// Get authorization token.
-        /// </summary>
-        /// <returns>True or false result operation.</returns>
-        private async Task<bool> GetAuthToken()
-        {
-            var data = await new AuthTokenRequest(_cloudApi).MakeRequestAsync();
-            if (string.IsNullOrEmpty(data?.body?.token))
-                throw new AuthenticationException("Empty auth token");
-            AuthToken = data.body.token;
-
-            return true;
-        }
-
-
-
     }
 }

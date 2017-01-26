@@ -53,7 +53,9 @@
     <Compile Include="AccountInfo.cs" />
     <Compile Include="Api\Account.cs" />
     <Compile Include="Api\ConstSettings.cs" />
+    <Compile Include="Api\DecodeDownloadStream.cs" />
     <Compile Include="Api\DownloadStream.cs" />
+    <Compile Include="Api\EncodeUploadStream.cs" />
     <Compile Include="Api\Requests\LoginRequest.cs" />
     <Compile Include="Api\SplittedUploadStream.cs" />
     <Compile Include="Api\UploadStream.cs" />
@@ -96,7 +98,12 @@
     <Compile Include="SplittedFile.cs" />
     <Compile Include="WebDavPath.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\XTSSharp\XTSSharp.csproj">
+      <Project>{1a2e919a-3820-4149-960e-96c1491fe02e}</Project>
+      <Name>XTSSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -298,7 +298,8 @@ namespace MailRuCloudApi
 
         public async Task<Stream> GetFileDownloadStream(File file, long? start, long? end)
         {
-            var task = Task.FromResult(new DownloadStream(file.Files, CloudApi, start, end));
+            //var task = Task.FromResult(new DownloadStream(file.Files, CloudApi, start, end));
+            var task = Task.FromResult(new DecodeDownloadStream(file.Files, CloudApi, start, end));
             Stream stream = await task;
             return stream;
         }
@@ -306,7 +307,8 @@ namespace MailRuCloudApi
 
         public Stream GetFileUploadStream(string destinationPath, string extension, long size)
         {
-            var stream = new SplittedUploadStream(destinationPath, CloudApi, size);
+            //var stream = new SplittedUploadStream(destinationPath, CloudApi, size);
+            var stream = new EncodeUploadStream(destinationPath, CloudApi, "test", size);
 
             return stream;
         }

@@ -20,9 +20,10 @@ namespace MailRuCloudApi.Api.Requests
 
         public virtual string RelationalUri { get; protected set; }
 
-        public virtual HttpWebRequest CreateRequest()
+        public virtual HttpWebRequest CreateRequest(string baseDomain = null)
         {
-            var uriz = new Uri(new Uri(ConstSettings.CloudDomain), RelationalUri);
+            string domain = string.IsNullOrEmpty(baseDomain) ? ConstSettings.CloudDomain : baseDomain;
+            var uriz = new Uri(new Uri(domain), RelationalUri);
 
             var request = (HttpWebRequest)WebRequest.Create(uriz);
             request.Proxy = CloudApi.Account.Proxy;

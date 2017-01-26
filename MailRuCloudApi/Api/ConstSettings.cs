@@ -7,7 +7,7 @@ namespace MailRuCloudApi.Api
     {
         public const string Domain = "mail.ru";
         public const string CloudDomain = "https://cloud.mail.ru";
-        public const string AuthDomen = "https://auth.mail.ru";
+        public const string AuthDomain = "https://auth.mail.ru";
         public const string PublishFileLink = CloudDomain + "/public/";
 
         public static string UserAgent = "Mozilla / 5.0(Windows; U; Windows NT 5.1; en - US; rv: 1.9.0.1) Gecko / 2008070208 Firefox / 3.0.1";

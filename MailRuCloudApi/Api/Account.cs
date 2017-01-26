@@ -94,7 +94,7 @@ namespace MailRuCloudApi.Api
 
             string reqString = $"Login={LoginName}&Domain={ConstSettings.Domain}&Password={Password}";
             byte[] requestData = Encoding.UTF8.GetBytes(reqString);
-            var request = (HttpWebRequest)WebRequest.Create($"{ConstSettings.AuthDomen}/cgi-bin/auth");
+            var request = (HttpWebRequest)WebRequest.Create($"{ConstSettings.AuthDomain}/cgi-bin/auth");
             request.Proxy = Proxy;
             request.CookieContainer = Cookies;
             request.Method = "POST";
@@ -155,27 +155,8 @@ namespace MailRuCloudApi.Api
         /// <returns>Returns nothing. Just tusk.</returns>
         private async Task EnsureSdcCookie()
         {
-            //var request = new EnsureSdcCookieRequest(_cloud);
-            //await _cloud.MakeRequestAsync(request);
-
-            var request = (HttpWebRequest)WebRequest.Create($"{ConstSettings.AuthDomen}/sdc?from={ConstSettings.CloudDomain}/home");
-            request.Proxy = Proxy;
-            request.CookieContainer = Cookies;
-            request.Method = "GET";
-            request.ContentType = ConstSettings.DefaultRequestType;
-            request.Accept = ConstSettings.DefaultAcceptType;
-            request.UserAgent = ConstSettings.UserAgent;
-            var task = Task.Factory.FromAsync(request.BeginGetResponse, asyncResult => request.EndGetResponse(asyncResult), null);
-            await task.ContinueWith((t) =>
-            {
-                using (var response = t.Result as HttpWebResponse)
-                {
-                    if (null == response || response.StatusCode != HttpStatusCode.OK)
-                    {
-                        throw new Exception("Response is null or wrong status");
-                    }
-                }
-            });
+            await new EnsureSdcCookieRequest(_cloudApi)
+                .MakeRequestAsync();
         }
 
         /// <summary>

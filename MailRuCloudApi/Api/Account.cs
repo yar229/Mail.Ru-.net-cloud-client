@@ -83,14 +83,10 @@ namespace MailRuCloudApi.Api
         public async Task<bool> LoginAsync()
         {
             if (string.IsNullOrEmpty(LoginName))
-            {
                 throw new ArgumentException("LoginName is null or empty.");
-            }
 
             if (string.IsNullOrEmpty(Password))
-            {
                 throw new ArgumentException("Password is null or empty.");
-            }
 
             await new LoginRequest(_cloudApi, LoginName, Password)
                 .MakeRequestAsync();
@@ -100,12 +96,14 @@ namespace MailRuCloudApi.Api
 
             AuthToken = new AuthTokenRequest(_cloudApi)
                 .MakeRequestAsync()
-                .ThrowIf(data => string.IsNullOrEmpty(data.body?.token), new AuthenticationException("Empty auth token"))
+                .ThrowIf(data => string.IsNullOrEmpty(data.body?.token), () => new AuthenticationException("Empty auth token"))
                 .body.token;
 
             Info = new AccountInfo
             {
-                FileSizeLimit = new AccountInfoRequest(_cloudApi).MakeRequestAsync().Result.body.cloud.file_size_limit
+                FileSizeLimit = new AccountInfoRequest(_cloudApi)
+                                    .MakeRequestAsync()
+                                    .Result.body.cloud.file_size_limit
             };
 
             Expires = DateTime.Now.AddHours(23);
@@ -132,10 +130,10 @@ namespace MailRuCloudApi.Api
 
     public static class Extensions
     {
-        public static T ThrowIf<T>(this Task<T> data, Func<T, bool> func, Exception ex)
+        public static T ThrowIf<T>(this Task<T> data, Func<T, bool> func, Func<AuthenticationException> ex)
         {
             var res = data.Result;
-            if (func(res)) throw ex;
+            if (func(res)) throw ex();
             return res;
         }
     }

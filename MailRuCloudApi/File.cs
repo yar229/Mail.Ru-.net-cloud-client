@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MailRuCloudApi
 {
@@ -94,6 +95,8 @@ namespace MailRuCloudApi
 
         public virtual List<File> Files => new List<File> {this};
 
+        public bool IsSplitted => Files.Any(f => f.Name != Name);
+
         /// <summary>
         /// Gets or sets base file name.
         /// </summary>
@@ -108,5 +111,7 @@ namespace MailRuCloudApi
         public virtual DateTime CreationTimeUtc { get; set; }
         public virtual DateTime LastWriteTimeUtc { get; set; }
         public virtual DateTime LastAccessTimeUtc { get; set; }
+
+        
     }
 }

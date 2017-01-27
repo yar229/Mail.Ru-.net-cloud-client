@@ -9,18 +9,18 @@ using XTSSharp;
 
 namespace MailRuCloudApi.Api.Streams.Transformers
 {
-    interface IByteTransformer
+    public interface IByteTransformer
     {
         byte[] Transform(byte[] buffer, int offset, int count);
         byte[] Data { get; }
     }
 
-    class XtsAes256Transformer : IByteTransformer
+    class XtsAes256EncodeTransformer : IByteTransformer
     {
         private readonly Xts _xts;
         private readonly KeyGenerator _keys;
 
-        public XtsAes256Transformer(string password)
+        public XtsAes256EncodeTransformer(string password)
         {
             _keys = new KeyGenerator(password);
             _xts = XtsAes256.Create(_keys.SecretKey, _keys.InitVector);
@@ -31,6 +31,32 @@ namespace MailRuCloudApi.Api.Streams.Transformers
         {
             var encrypted = new byte[buffer.Length];
             using (var transform = _xts.CreateEncryptor())
+            {
+                var bytes = transform.TransformBlock(buffer, offset, count, encrypted, offset, 0x123456789a);
+            }
+            return encrypted;
+        }
+
+        public byte[] Data => _keys.InitVector;
+    }
+
+
+    class XtsAes256DecodeTransformer : IByteTransformer
+    {
+        private readonly Xts _xts;
+        private readonly KeyGenerator _keys;
+
+        public XtsAes256DecodeTransformer(string password, byte[] initVector)
+        {
+            _keys = new KeyGenerator(password, initVector);
+            _xts = XtsAes256.Create(_keys.SecretKey, _keys.InitVector);
+        }
+
+
+        public byte[] Transform(byte[] buffer, int offset, int count)
+        {
+            var encrypted = new byte[buffer.Length];
+            using (var transform = _xts.CreateDecryptor())
             {
                 var bytes = transform.TransformBlock(buffer, offset, count, encrypted, offset, 0x123456789a);
             }

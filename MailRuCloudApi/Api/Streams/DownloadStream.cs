@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using MailRuCloudApi.Api.Streams.Transformers;
 
 namespace MailRuCloudApi.Api.Streams
 {
@@ -12,27 +13,37 @@ namespace MailRuCloudApi.Api.Streams
     {
         private const int InnerBufferSize = 65536;
 
-        private readonly IList<File> _files;
+        private IList<File> _files => _file.Files;
         private readonly ShardInfo _shard;
+        private readonly File _file;
         private readonly CloudApi _cloud;
         private readonly long? _start;
         private readonly long? _end;
+        private readonly Func<byte[], IByteTransformer> _transformerFunc;
 
         private RingBufferedStream _innerStream;
 
 
-        public DownloadStream(IList<File> files, CloudApi cloud, long? start, long? end)
+        public DownloadStream(File file, CloudApi cloud, long? start, long? end, Func<byte[], IByteTransformer> transformerFunc)
         {
-            _files = files;
+            _file = file;
             _cloud = cloud;
             _start = start;
             _end = end;
+            _transformerFunc = transformerFunc;
 
             _shard = _cloud.GetShardInfo(ShardType.Get).Result;
 
             Initialize();
         }
 
+
+        private FileInfo.FileInfo GetHeader(File file, CloudApi api)
+        {
+            var stream = new DownloadStream(file, api, null, null, null);
+            var data = 
+            
+        }
 
         private void Initialize()
         {

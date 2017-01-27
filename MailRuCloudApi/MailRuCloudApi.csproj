@@ -63,7 +63,7 @@
     <Compile Include="Api\Requests\LoginRequest.cs" />
     <Compile Include="Api\Streams\SplittedUploadStream.cs" />
     <Compile Include="Api\Streams\Splitters\IFileSplitter.cs" />
-    <Compile Include="Api\Streams\Transformers\XtsAes256Transformer.cs" />
+    <Compile Include="Api\Streams\Transformers\XtsAes256EncodeTransformer.cs" />
     <Compile Include="Api\Streams\UploadStream.cs" />
     <Compile Include="DiskUsage.cs" />
     <Compile Include="Entry.cs" />

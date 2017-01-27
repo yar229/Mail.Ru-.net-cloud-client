@@ -5,6 +5,7 @@
 // <author>Korolev Erast.</author>
 //-----------------------------------------------------------------------
 
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api;
@@ -301,8 +302,16 @@ namespace MailRuCloudApi
 
         public async Task<Stream> GetFileDownloadStream(File file, long? start, long? end)
         {
-            var task = Task.FromResult(new DownloadStream(file.Files, CloudApi, start, end));
+            var task = Task.FromResult(new DownloadStream(file, CloudApi, start, end));
             //var task = Task.FromResult(new DecodeDownloadStream(file.Files, CloudApi, "test", start, end));
+
+
+            var transformer = new Func<byte[], XtsAes256DecodeTransformer>(vector => new XtsAes256DecodeTransformer("test", vector));
+
+
+            var task = Task.FromResult(new DecodeDownloadStream(file, CloudApi, "test", start, end, transformer));
+
+            
             Stream stream = await task;
             return stream;
         }
@@ -316,11 +325,11 @@ namespace MailRuCloudApi
                     //: long.MaxValue - 1024
 
             var splitter = new EncodedFileSplitter(maxSize);
-            var transformer = new XtsAes256Transformer("test");
+            var transformer = new Func<XtsAes256EncodeTransformer>(() => new XtsAes256EncodeTransformer("test"));
 
             var stream = new SplittedUploadStream(destinationPath, CloudApi, size, 
-                splitter, 
-                () => new XtsAes256Transformer("test"));
+                splitter,
+                transformer);
             //var stream = new EncodeUploadStream(destinationPath, CloudApi, "test", size);
 
             return stream;

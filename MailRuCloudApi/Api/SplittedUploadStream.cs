@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using MailRuCloudApi.FileInfo;
+using Newtonsoft.Json;
 
 namespace MailRuCloudApi.Api
 {
@@ -14,7 +17,7 @@ namespace MailRuCloudApi.Api
         private File _origfile;
 
         private int _currFileId = -1;
-        protected long _bytesWrote;
+        protected long BytesWrote;
         private UploadStream _uploadStream;
 
 
@@ -67,7 +70,7 @@ namespace MailRuCloudApi.Api
             if (_currFileId >= _files.Count)
                 return;
 
-            _bytesWrote = 0;
+            BytesWrote = 0;
             _uploadStream = new UploadStream(_files[_currFileId].FullPath, _cloud, _files[_currFileId].Size.DefaultValue);
         }
 
@@ -94,33 +97,44 @@ namespace MailRuCloudApi.Api
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            long diff = _bytesWrote + count - _files[_currFileId].Size.DefaultValue;
-
-            if (diff > 0)
+            var filefreeleft = _files[_currFileId].Size.DefaultValue - BytesWrote;
+            if (filefreeleft >= count)
             {
-                var zbuffer = new byte[count - diff];
-                Array.Copy(buffer, 0, zbuffer, 0, count - diff);
-                long zcount = count;
-
-                _uploadStream.Write(zbuffer, offset, (int)(zcount - diff));
-
-                NextFile();
+                _uploadStream.Write(buffer, offset, count);
+                BytesWrote += count;
             }
-
-            long ncount = diff <= 0 ? count : diff;
-            var nbuffer = new byte[ncount];
-            Array.Copy(buffer, count - ncount, nbuffer, 0, ncount);
-
-            _bytesWrote += ncount;
-
-            _uploadStream.Write(nbuffer, offset, (int)ncount);
+            else
+            {
+                _uploadStream.Write(buffer, offset, (int)filefreeleft);
+                NextFile();
+                Write(buffer, offset + (int)filefreeleft, count - (int)filefreeleft);
+            }
         }
 
         public override void Close()
         {
             if (_files.Count > 1)
             {
-                string content = $"filename={_origfile.Name}\r\nsize = {_origfile.Size.DefaultValue}"; //TODO: calculate CRC32 \r\ncrc32 = C9EB1402\r\n";
+                var info = new SplittedFileInfo
+                {
+                    Name = _origfile.Name,
+                    Size = _origfile.Size.DefaultValue,
+                    Crc32 = 0, //TODO: calculate CRC32
+                    Key = null,
+                    Parts = _files
+                        .Where(f => f.Name != _origfile.Name)
+                        .Select(f => new FileInfo.FileInfo
+                        {
+                            Name = f.Name,
+                            Size = f.Size.DefaultValue,
+                            Crc32 = 0,
+                            Key = null
+                        })
+                        .ToList()
+                };
+
+                string content = JsonConvert.SerializeObject(info);
+
                 var data = Encoding.UTF8.GetBytes(content);
                 var stream = new UploadStream(_origfile.FullPath, _cloud, data.Length);
                 stream.Write(data, 0, data.Length);

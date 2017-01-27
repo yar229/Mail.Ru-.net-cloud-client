@@ -115,10 +115,10 @@ namespace MailRuCloudApi.Api
         public override void Write(byte[] buffer, int offset, int count)
         {
             _canWrite.WaitOne();
-            BufferSize += buffer.Length;
+            BufferSize += count;
 
-            var zbuffer = new byte[buffer.Length];
-            buffer.CopyTo(zbuffer, 0);
+            var zbuffer = new byte[count];
+            Array.Copy(buffer, offset, zbuffer, 0, count);
             var zcount = count;
             _task = _task.ContinueWith(
                             (t, m) =>

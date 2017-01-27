@@ -6,7 +6,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MailRuCloudApi.Api
+namespace MailRuCloudApi.Api.Streams
 {
     public class DownloadStream : Stream
     {

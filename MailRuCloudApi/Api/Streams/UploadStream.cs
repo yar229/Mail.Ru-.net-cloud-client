@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api.Requests;
 
-namespace MailRuCloudApi.Api
+namespace MailRuCloudApi.Api.Streams
 {
     internal class UploadStream : Stream
     {

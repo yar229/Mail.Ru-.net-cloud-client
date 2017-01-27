@@ -9,6 +9,9 @@ using System.IO;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api;
 using MailRuCloudApi.Api.Requests;
+using MailRuCloudApi.Api.Streams;
+using MailRuCloudApi.Api.Streams.Splitters;
+using MailRuCloudApi.Api.Streams.Transformers;
 using MailRuCloudApi.Extensions;
 
 namespace MailRuCloudApi
@@ -298,8 +301,8 @@ namespace MailRuCloudApi
 
         public async Task<Stream> GetFileDownloadStream(File file, long? start, long? end)
         {
-            //var task = Task.FromResult(new DownloadStream(file.Files, CloudApi, start, end));
-            var task = Task.FromResult(new DecodeDownloadStream(file.Files, CloudApi, "test", start, end));
+            var task = Task.FromResult(new DownloadStream(file.Files, CloudApi, start, end));
+            //var task = Task.FromResult(new DecodeDownloadStream(file.Files, CloudApi, "test", start, end));
             Stream stream = await task;
             return stream;
         }
@@ -307,8 +310,18 @@ namespace MailRuCloudApi
 
         public Stream GetFileUploadStream(string destinationPath, string extension, long size)
         {
-            //var stream = new SplittedUploadStream(destinationPath, CloudApi, size);
-            var stream = new EncodeUploadStream(destinationPath, CloudApi, "test", size);
+            var maxSize = 7000;
+                    //CloudApi.Account.Info.FileSizeLimit > 0
+                    //? CloudApi.Account.Info.FileSizeLimit - 1024
+                    //: long.MaxValue - 1024
+
+            var splitter = new EncodedFileSplitter(maxSize);
+            var transformer = new XtsAes256Transformer("test");
+
+            var stream = new SplittedUploadStream(destinationPath, CloudApi, size, 
+                splitter, 
+                () => new XtsAes256Transformer("test"));
+            //var stream = new EncodeUploadStream(destinationPath, CloudApi, "test", size);
 
             return stream;
         }

@@ -3,23 +3,38 @@ using System.Collections.Generic;
 using MailRuCloudApi.Api.Crypt;
 using XTSSharp;
 
-namespace MailRuCloudApi.Api
+namespace MailRuCloudApi.Api.Streams
 {
     class DecodeDownloadStream : DownloadStream
     {
-        public DecodeDownloadStream(IList<File> files, CloudApi cloud, string password, long? start, long? end) : base(files, cloud, start, end)
+        public DecodeDownloadStream(IList<File> files, CloudApi cloud, string password, long? start, long? end): base(files, cloud, start, end)
         {
+            var headerStream = new DownloadStream(files, cloud, 0, 32);
+
+
             var iv = new byte[32];
-            //var bytes = base.Read(iv, 0, 32);
-            //_keys = new KeyGenerator(password, iv);
-            _keys = new KeyGenerator(password);
+            var bytes = headerStream.Read(iv, 0, 32);
+            _keys = new KeyGenerator(password, iv);
+
+            //_keys = new KeyGenerator(password);
         }
 
         private readonly KeyGenerator _keys;
 
+
+        private bool _first = true;
         public override int Read(byte[] buffer, int offset, int count)
         {
+            if (_first)
+            {
+                var bf = new byte[32];
+                var readedf = base.Read(bf, 0, 32);
+                _first = false;
+            }
+
             var readed =  base.Read(buffer, offset, count);
+
+            
 
             if (readed > 0)
             {

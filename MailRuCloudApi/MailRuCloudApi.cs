@@ -302,14 +302,14 @@ namespace MailRuCloudApi
 
         public async Task<Stream> GetFileDownloadStream(File file, long? start, long? end)
         {
-            var task = Task.FromResult(new DownloadStream(file, CloudApi, start, end));
+            //var task = Task.FromResult(new DownloadStream(file, CloudApi, start, end));
             //var task = Task.FromResult(new DecodeDownloadStream(file.Files, CloudApi, "test", start, end));
 
 
             var transformer = new Func<byte[], XtsAes256DecodeTransformer>(vector => new XtsAes256DecodeTransformer("test", vector));
 
 
-            var task = Task.FromResult(new DecodeDownloadStream(file, CloudApi, "test", start, end, transformer));
+            var task = Task.FromResult(new DownloadStream(file, CloudApi, start, end, transformer));
 
             
             Stream stream = await task;

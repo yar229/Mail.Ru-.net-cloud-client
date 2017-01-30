@@ -4,6 +4,7 @@ using System.Security.Authentication;
 using System.Threading;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api.Requests;
+using MailRuCloudApi.Api.Streams;
 using MailRuCloudApi.Extensions;
 
 namespace MailRuCloudApi.Api
@@ -36,49 +37,26 @@ namespace MailRuCloudApi.Api
         }
 
 
-        private async Task<object> GetFile(string sourceFile, string fileName, long contentLength = 0)
+        public byte[] GetFile(File file)
         {
-            var shard = await GetShardInfo(ShardType.Get);
-            MemoryStream memoryStream = new MemoryStream();
+            var stream = new DownloadStream(file, this, null, null, null);
+            //using (MemoryStream ms = new MemoryStream())
+            //{ 
+            //    stream.CopyTo(ms);
+            //    return ms.ToArray();
+            //}
 
-
-            var request = (HttpWebRequest)WebRequest.Create($"{shard.Url}{sourceFile.TrimStart('/')}");
-            request.Proxy = Account.Proxy;
-            request.CookieContainer = Account.Cookies;
-            request.Method = "GET";
-            request.ContentType = ConstSettings.DefaultRequestType;
-            request.Accept = ConstSettings.DefaultAcceptType;
-            request.UserAgent = ConstSettings.UserAgent;
-            request.AllowReadStreamBuffering = false;
-            var task = Task.Factory.FromAsync(request.BeginGetResponse, asyncResult => request.EndGetResponse(asyncResult), null);
-            await task.ContinueWith(
-                (t, m) =>
+            byte[] buffer = new byte[16 * 1024];
+            using (MemoryStream ms = new MemoryStream())
+            {
+                int read;
+                while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
                 {
-                    var token = (CancellationToken)m;
-
-                        try
-                        {
-                            ReadResponseAsByte(t.Result, token, memoryStream, contentLength, OperationType.Download);
-                            return memoryStream.ToArray() as object;
-                        }
-                        catch
-                        {
-                            return null;
-                        }
-                      
-                },
-            CancelToken.Token);
-            
-
-            var result = memoryStream.ToArray() as object;
-
-            memoryStream.Dispose();
-            memoryStream.Close();
-
-            return result;
+                    ms.Write(buffer, 0, read);
+                }
+                return ms.ToArray();
+            }
         }
-
-
 
         /// <summary>
         /// Get shard info that to do post get request. Can be use for anonymous user.

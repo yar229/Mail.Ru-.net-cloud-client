@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api.Streams.Transformers;
+using Newtonsoft.Json;
 
 namespace MailRuCloudApi.Api.Streams
 {
@@ -22,6 +24,7 @@ namespace MailRuCloudApi.Api.Streams
         private readonly Func<byte[], IByteTransformer> _transformerFunc;
 
         private RingBufferedStream _innerStream;
+        private FileInfo.SplittedFileInfo _headers;
 
 
         public DownloadStream(File file, CloudApi cloud, long? start, long? end, Func<byte[], IByteTransformer> transformerFunc)
@@ -38,15 +41,22 @@ namespace MailRuCloudApi.Api.Streams
         }
 
 
-        private FileInfo.FileInfo GetHeader(File file, CloudApi api)
+        private FileInfo.SplittedFileInfo GetHeader(File file, CloudApi api)
         {
-            var stream = new DownloadStream(file, api, null, null, null);
-            var data = 
-            
+            var f = file.IsSplitted
+                        ? new File(file.FullPath, file.Size.DefaultValue, "") 
+                        : file.Files.First(fi => fi.Name == file.Name);
+
+            var data = api.GetFile(f);
+            var str = Encoding.UTF8.GetString(data);
+            var obj = JsonConvert.DeserializeObject<FileInfo.SplittedFileInfo>(str);
+            return obj;
         }
 
         private void Initialize()
         {
+            if (_file.IsSplitted) _headers = GetHeader(_file, _cloud);
+
             _innerStream = new RingBufferedStream(InnerBufferSize);
 
             // ReSharper disable once UnusedVariable
@@ -78,6 +88,8 @@ namespace MailRuCloudApi.Api.Streams
                     request.Headers.Add("Content-Range", $"bytes {start}-{end} / {length}");
                 }
 
+                var z = _transformerFunc(_headers.Parts.First(hi => hi.Name == file.Name).Key);
+
                 var task = Task.Factory.FromAsync(request.BeginGetResponse,
                     asyncResult => request.EndGetResponse(asyncResult), null);
                 await task.ContinueWith(
@@ -87,7 +99,7 @@ namespace MailRuCloudApi.Api.Streams
                         {
                             try
                             {
-                                ReadResponseAsByte(t.Result, token, _innerStream);
+                                ReadResponseAsByte(t.Result, token, _innerStream, z);
                                 return _innerStream;
                             }
                             catch (Exception)
@@ -111,7 +123,7 @@ namespace MailRuCloudApi.Api.Streams
             base.Close();
         }
 
-        private void ReadResponseAsByte(WebResponse resp, CancellationToken token, Stream outputStream = null)
+        private void ReadResponseAsByte(WebResponse resp, CancellationToken token, Stream outputStream, IByteTransformer byteTransformer)
         {
             using (Stream responseStream = resp.GetResponseStream())
             {
@@ -129,7 +141,11 @@ namespace MailRuCloudApi.Api.Streams
                     }
                     totalRead += bytesRead;
 
-                    outputStream?.Write(buffer, 0, bytesRead);
+                    var data = null == byteTransformer 
+                        ? buffer
+                        : byteTransformer.Transform(buffer, 0, bytesRead);
+
+                    outputStream?.Write(data, 0, bytesRead);
                 }
             }
         }

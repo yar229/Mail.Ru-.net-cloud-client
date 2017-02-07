@@ -268,9 +268,12 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public virtual async Task<bool> Remove(File file)
         {
-            foreach (var fileFile in file.Files)
+            if (file.IsSplitted)
             {
-                await Remove(fileFile.FullPath);
+                foreach (var fileFile in file.Files)
+                {
+                    await Remove(fileFile.FullPath);
+                }
             }
             var result = await Remove(file.FullPath);
 

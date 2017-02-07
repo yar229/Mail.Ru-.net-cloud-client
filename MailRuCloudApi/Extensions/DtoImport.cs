@@ -69,7 +69,7 @@ namespace MailRuCloudApi.Extensions
         {
             var entry = new Entry(
                     data.body.list
-                        .Where(it => it.kind == "folder")
+                        .Where(it => it.kind == "folder" || it.kind == "camera-upload")
                         .Select(it => new Folder(it.home)
                         {
                             NumberOfFolders = it.count.folders,

@@ -60,7 +60,7 @@ namespace MailRuCloudApi.Api
 
                 fileEnd += file.Size.DefaultValue;
 
-                if (glostart >= fileEnd  || gloend < fileStart) continue;
+                if (glostart >= fileEnd  || gloend <= fileStart) continue;
 
                 var instart = Math.Max(0, glostart - fileStart);
                 var inend = Math.Min(file.Size.DefaultValue, gloend - fileStart);

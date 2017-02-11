@@ -16,7 +16,7 @@ namespace MailRuCloudApi.Api.Requests
         {
             get
             {
-                var uri = $"/api/v2/folder?token={CloudApi.Account.AuthToken}&home={Uri.EscapeDataString(_path)}";
+                var uri = $"/api/v2/folder?token={CloudApi.Account.AuthToken}&home={Uri.EscapeDataString(_path)}&offset=0&limit={int.MaxValue}";
                 return uri;
             }
         }

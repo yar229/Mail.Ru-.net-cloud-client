@@ -156,8 +156,8 @@ namespace MailRuCloudApi.Api
                      finally
                      {
                          var st = t.Result;
-                         st?.Close();
                          st?.Dispose();
+                         st = null;
                      }
 
 
@@ -237,13 +237,20 @@ namespace MailRuCloudApi.Api
         private long WriteBytesInStream(byte[] bytes, Stream outputStream, CancellationToken token, long length)
         {
             BufferSize -= bytes.Length;
+            Stream stream = null;
 
-            using (var stream = new MemoryStream(bytes))
+            try
             {
+                stream = new MemoryStream(bytes);
                 using (var source = new BinaryReader(stream))
                 {
+                    stream = null;
                     return WriteBytesInStream(source, outputStream, token, length);
                 }
+            }
+            finally
+            {
+                stream?.Dispose();
             }
         }
 

@@ -3,6 +3,7 @@ using System.Net;
 
 namespace MailRuCloudApi.Api.Requests
 {
+    [Serializable]
     public class RequestException : Exception
     {
         public RequestException()

@@ -360,6 +360,7 @@ namespace MailRuCloudApi.Api
             {
                 _disposed = true;
                 _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
             }
 
             base.Dispose(disposing);

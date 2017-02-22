@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Security.Authentication;
-using System.Text;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api.Requests;
 

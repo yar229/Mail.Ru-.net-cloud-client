@@ -5,6 +5,7 @@
 // <author>Korolev Erast.</author>
 //-----------------------------------------------------------------------
 
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api;
@@ -18,7 +19,7 @@ namespace MailRuCloudApi
     /// <summary>
     /// Cloud client.
     /// </summary>
-    public class MailRuCloud
+    public class MailRuCloud : IDisposable
     {
 
         public CloudApi CloudApi { get; }
@@ -356,6 +357,27 @@ namespace MailRuCloudApi
 
             return true;
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    CloudApi?.Dispose();
+                }
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
 
     }
 }

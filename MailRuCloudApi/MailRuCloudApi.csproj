@@ -57,6 +57,7 @@
     <Compile Include="Api\Requests\LoginRequest.cs" />
     <Compile Include="Api\SplittedUploadStream.cs" />
     <Compile Include="Api\UploadStream.cs" />
+    <Compile Include="CarotCryptStream.cs" />
     <Compile Include="DiskUsage.cs" />
     <Compile Include="Entry.cs" />
     <Compile Include="Extensions\DtoImport.cs" />

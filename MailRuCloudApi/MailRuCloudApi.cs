@@ -337,7 +337,7 @@ namespace MailRuCloudApi
         /// <param name="destinationPath">Destination path to cope or move.</param>
         /// <param name="move">Move or copy operation.</param>
         /// <returns>New created file name.</returns>
-        private async Task<string> MoveOrCopy(string sourceFullPath, string destinationPath, bool move)
+        public async Task<string> MoveOrCopy(string sourceFullPath, string destinationPath, bool move)
         {
             var data = await new MoveOrCopyRequest(CloudApi, sourceFullPath, destinationPath, move)
                 .MakeRequestAsync();

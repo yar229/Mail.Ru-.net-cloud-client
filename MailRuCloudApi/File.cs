@@ -57,7 +57,7 @@ namespace MailRuCloudApi
         public virtual FileSize Size
         {
             get { return _size; }
-            internal set { _size = value; }
+            set { _size = value; }
         }
 
         /// <summary>

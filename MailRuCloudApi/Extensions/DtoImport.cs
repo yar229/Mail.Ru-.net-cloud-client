@@ -70,14 +70,8 @@ namespace MailRuCloudApi.Extensions
             var entry = new Entry(
                     data.body.list
                         .Where(it => it.kind == "folder" || it.kind == "camera-upload")
-                        .Select(it => new Folder(it.home)
-                        {
-                            NumberOfFolders = it.count.folders,
-                            NumberOfFiles = it.count.files,
-                            Size = it.size,
-                            PublicLink =
-                                string.IsNullOrEmpty(it.weblink) ? "" : ConstSettings.PublishFileLink + it.weblink
-                        }).ToList(),
+                        .Select(it => new Folder(it.count.folders, it.count.files, it.size, it.home, string.IsNullOrEmpty(it.weblink) ? "" : ConstSettings.PublishFileLink + it.weblink))
+                        .ToList(),
                     data.body.list
                         .Where(it => it.kind == "file")
                         .Select(it => new File(it.home, it.size, it.hash)

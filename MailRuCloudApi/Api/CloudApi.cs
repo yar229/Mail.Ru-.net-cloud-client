@@ -49,17 +49,17 @@ namespace MailRuCloudApi.Api
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool _disposedValue;
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
                     CancelToken.Dispose();
                 }
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

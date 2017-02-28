@@ -359,17 +359,17 @@ namespace MailRuCloudApi
         }
 
         #region IDisposable Support
-        private bool disposedValue = false;
+        private bool _disposedValue;
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
                     CloudApi?.Dispose();
                 }
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

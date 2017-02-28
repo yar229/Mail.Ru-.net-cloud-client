@@ -129,6 +129,7 @@ namespace MailRuCloudApi.Api
                                     var s = t.Result;
                                     WriteBytesInStream(zbuffer, s, token, zcount);
                                 }
+                                // ReSharper disable once UnusedVariable
                                 catch (Exception ex)
                                 {
                                     return null;
@@ -157,7 +158,6 @@ namespace MailRuCloudApi.Api
                      {
                          var st = t.Result;
                          st?.Dispose();
-                         st = null;
                      }
 
 

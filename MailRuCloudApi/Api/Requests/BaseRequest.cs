@@ -58,7 +58,7 @@ namespace MailRuCloudApi.Api.Requests
             {
 
                 if ((int)response.StatusCode >= 500)
-                    throw new RequestException("Server fault"); // Let's throw exception. It's server fault
+                    throw new RequestException("Server fault") {StatusCode = response.StatusCode}; // Let's throw exception. It's server fault
 
                 var responseText = ReadResponseAsText(response, CloudApi.CancelToken.Token); //await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var result = DeserializeMessage(responseText);

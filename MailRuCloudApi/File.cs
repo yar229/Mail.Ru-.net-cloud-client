@@ -110,6 +110,27 @@ namespace MailRuCloudApi
         public virtual DateTime LastWriteTimeUtc { get; set; }
         public virtual DateTime LastAccessTimeUtc { get; set; }
         public bool IsSplitted => Files.Any(f => f.FullPath != FullPath);
+
+        public void SetName(string destinationName)
+        {
+            string path = WebDavPath.Parent(FullPath);
+            FullPath = WebDavPath.Combine(path, destinationName); ;
+            if (Files.Count > 1)
+                foreach (var fiFile in Files)
+                {
+                    fiFile.FullPath = WebDavPath.Combine(path, destinationName + ".wdmrc" + fiFile.Extension); //TODO: refact
+                }
+        }
+
+        public void SetPath(string fullPath)
+        {
+            FullPath = WebDavPath.Combine(fullPath, Name); ;
+            if (Files.Count > 1)
+                foreach (var fiFile in Files)
+                {
+                    fiFile.FullPath = WebDavPath.Combine(fullPath, fiFile.Name); //TODO: refact
+                }
+        }
     }
 }
 

@@ -245,6 +245,11 @@ namespace MailRuCloudApi
         public async Task<bool> Move(File file, string destinationPath)
         {
             var result = !string.IsNullOrEmpty(await MoveOrCopy(file.FullPath, destinationPath, true));
+            if (file.Files.Count > 1)
+            {
+                foreach (var splitFile in file.Files)
+                    await MoveOrCopy(splitFile.FullPath, destinationPath, true);
+            }
             return result;
         }
 
@@ -343,6 +348,8 @@ namespace MailRuCloudApi
                 .MakeRequestAsync();
             return data.ToString();
         }
+
+
 
 
         /// <summary>

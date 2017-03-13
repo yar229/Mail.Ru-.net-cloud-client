@@ -172,7 +172,7 @@ namespace MailRuCloudApi.Api
             {
                 if (_start != null && _end != null)
                 {
-                    var l = _end.Value - _start.Value;
+                    var l = _end.Value - _start.Value + 1;
                     return l;
                 }
 

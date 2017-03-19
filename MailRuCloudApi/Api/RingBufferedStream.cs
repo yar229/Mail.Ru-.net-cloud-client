@@ -31,7 +31,7 @@ namespace MailRuCloudApi.Api
         private bool _disposed;
 
 
-        private bool _flushed;
+        private ManualResetEvent _flushed = new ManualResetEvent(false);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RingBufferedStream"/>
@@ -96,8 +96,13 @@ namespace MailRuCloudApi.Api
         /// <inheritdoc/>
         public override void Flush()
         {
-            _flushed = true;
-            _readAvailable.Set();
+            if (!_disposed)
+            {
+                _flushed.Set();
+                _cancellationTokenSource?.Cancel();
+            }
+            //_readAvailable.Reset();
+            //_readAvailable.Set();
         }
 
         /// <summary>
@@ -253,7 +258,7 @@ namespace MailRuCloudApi.Api
             {
                 while (count > 0 )
                 {
-                    if (_readAvailableByteCount == 0 && !_flushed)
+                    if (_readAvailableByteCount == 0)
                     {
                         _readAvailable.Reset();
                         Monitor.Exit(_store);
@@ -286,7 +291,7 @@ namespace MailRuCloudApi.Api
 
                         _writeAvailable.Set();
 
-                        if (_flushed) return ret;
+                        if (_flushed.WaitOne(0)) return ret;
                     }
                 }
             }
@@ -360,6 +365,7 @@ namespace MailRuCloudApi.Api
             {
                 _disposed = true;
                 _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
             }
 
             base.Dispose(disposing);

@@ -1,4 +1,5 @@
-﻿using System.Security.Authentication;
+﻿using System;
+using System.Security.Authentication;
 using System.Threading;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api.Requests;
@@ -6,7 +7,7 @@ using MailRuCloudApi.Extensions;
 
 namespace MailRuCloudApi.Api
 {
-    public class CloudApi
+    public class CloudApi : IDisposable
     {
 
         /// <summary>
@@ -46,6 +47,28 @@ namespace MailRuCloudApi.Api
             var shard = data.ToShardInfo(shardType);
             return shard;
         }
+
+        #region IDisposable Support
+        private bool _disposedValue;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    CancelToken.Dispose();
+                }
+                _disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
+
 
     }
 

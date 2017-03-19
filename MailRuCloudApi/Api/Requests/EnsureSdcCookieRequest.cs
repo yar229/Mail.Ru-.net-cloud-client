@@ -8,9 +8,9 @@ namespace MailRuCloudApi.Api.Requests
         {
         }
 
-        public override HttpWebRequest CreateRequest()
+        public override HttpWebRequest CreateRequest(string baseDomain = null)
         {
-            var request = base.CreateRequest();
+            var request = base.CreateRequest(ConstSettings.AuthDomain);
             request.Accept = ConstSettings.DefaultAcceptType;
             return request;
         }

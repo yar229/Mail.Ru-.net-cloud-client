@@ -115,10 +115,10 @@ namespace MailRuCloudApi.Api
         public override void Write(byte[] buffer, int offset, int count)
         {
             _canWrite.WaitOne();
-            BufferSize += buffer.Length;
+            BufferSize += count;
 
-            var zbuffer = new byte[buffer.Length];
-            buffer.CopyTo(zbuffer, 0);
+            var zbuffer = new byte[count];
+            Array.Copy(buffer, offset, zbuffer, 0, count); //buffer.CopyTo(zbuffer, 0);
             var zcount = count;
             _task = _task.ContinueWith(
                             (t, m) =>
@@ -129,7 +129,8 @@ namespace MailRuCloudApi.Api
                                     var s = t.Result;
                                     WriteBytesInStream(zbuffer, s, token, zcount);
                                 }
-                                catch (Exception)
+                                // ReSharper disable once UnusedVariable
+                                catch (Exception ex)
                                 {
                                     return null;
                                 }
@@ -156,7 +157,6 @@ namespace MailRuCloudApi.Api
                      finally
                      {
                          var st = t.Result;
-                         st?.Close();
                          st?.Dispose();
                      }
 
@@ -237,13 +237,20 @@ namespace MailRuCloudApi.Api
         private long WriteBytesInStream(byte[] bytes, Stream outputStream, CancellationToken token, long length)
         {
             BufferSize -= bytes.Length;
+            Stream stream = null;
 
-            using (var stream = new MemoryStream(bytes))
+            try
             {
+                stream = new MemoryStream(bytes);
                 using (var source = new BinaryReader(stream))
                 {
+                    stream = null;
                     return WriteBytesInStream(source, outputStream, token, length);
                 }
+            }
+            finally
+            {
+                stream?.Dispose();
             }
         }
 

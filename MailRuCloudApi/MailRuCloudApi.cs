@@ -5,6 +5,7 @@
 // <author>Korolev Erast.</author>
 //-----------------------------------------------------------------------
 
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api;
@@ -18,7 +19,7 @@ namespace MailRuCloudApi
     /// <summary>
     /// Cloud client.
     /// </summary>
-    public class MailRuCloud
+    public class MailRuCloud : IDisposable
     {
 
         public CloudApi CloudApi { get; }
@@ -244,6 +245,11 @@ namespace MailRuCloudApi
         public async Task<bool> Move(File file, string destinationPath)
         {
             var result = !string.IsNullOrEmpty(await MoveOrCopy(file.FullPath, destinationPath, true));
+            if (file.Files.Count > 1)
+            {
+                foreach (var splitFile in file.Files)
+                    await MoveOrCopy(splitFile.FullPath, destinationPath, true);
+            }
             return result;
         }
 
@@ -268,9 +274,12 @@ namespace MailRuCloudApi
         /// <returns>True or false operation result.</returns>
         public virtual async Task<bool> Remove(File file)
         {
-            foreach (var fileFile in file.Files)
+            if (file.IsSplitted)
             {
-                await Remove(fileFile.FullPath);
+                foreach (var fileFile in file.Files)
+                {
+                    await Remove(fileFile.FullPath);
+                }
             }
             var result = await Remove(file.FullPath);
 
@@ -304,7 +313,7 @@ namespace MailRuCloudApi
         }
 
 
-        public Stream GetFileUploadStream(string destinationPath, string extension, long size)
+        public Stream GetFileUploadStream(string destinationPath, long size)
         {
             var stream = new SplittedUploadStream(destinationPath, CloudApi, size);
 
@@ -333,12 +342,14 @@ namespace MailRuCloudApi
         /// <param name="destinationPath">Destination path to cope or move.</param>
         /// <param name="move">Move or copy operation.</param>
         /// <returns>New created file name.</returns>
-        private async Task<string> MoveOrCopy(string sourceFullPath, string destinationPath, bool move)
+        public async Task<string> MoveOrCopy(string sourceFullPath, string destinationPath, bool move)
         {
             var data = await new MoveOrCopyRequest(CloudApi, sourceFullPath, destinationPath, move)
                 .MakeRequestAsync();
             return data.ToString();
         }
+
+
 
 
         /// <summary>
@@ -353,6 +364,27 @@ namespace MailRuCloudApi
 
             return true;
         }
+
+        #region IDisposable Support
+        private bool _disposedValue;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    CloudApi?.Dispose();
+                }
+                _disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
 
     }
 }

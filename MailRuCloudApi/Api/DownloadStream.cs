@@ -46,7 +46,7 @@ namespace MailRuCloudApi.Api
 
         private async Task<object> GetFileStream()
         {
-            var totalLength = _files.Sum(f => f.Size.DefaultValue);
+            var totalLength = Length; //_files.Sum(f => f.Size.DefaultValue);
             var glostart = _start ?? 0;
             var gloend = _end ?? totalLength;
 
@@ -189,7 +189,7 @@ namespace MailRuCloudApi.Api
             {
                 if (_start != null && _end != null)
                 {
-                    var l = _end.Value - _start.Value;
+                    var l = _end.Value - _start.Value + 1;
                     return l;
                 }
 

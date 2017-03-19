@@ -53,6 +53,8 @@ namespace MailRuCloudApi.Api
             long fileStart = 0;
             long fileEnd = 0;
 
+            Task<WebResponse> task = Task.FromResult((WebResponse)null);
+
             foreach (var file in _files)
             {
                 //TODO: refact
@@ -60,9 +62,15 @@ namespace MailRuCloudApi.Api
 
                 fileEnd += file.Size.DefaultValue;
 
-                if (glostart >= fileEnd  || gloend <= fileStart) continue;
+                if (glostart >= fileEnd || gloend <= fileStart)
+                {
+                    fileStart += file.Size.DefaultValue;
+                    continue;
+                }
 
+                //var instart = Math.Min(0, glostart - fileStart);
                 var instart = Math.Max(0, glostart - fileStart);
+                //var instart = Math.Min(0, Math.Abs(glostart - fileStart));
                 var inend = Math.Min(file.Size.DefaultValue, gloend - fileStart);
 
                 request.Headers.Add("Accept-Ranges", "bytes");
@@ -79,9 +87,10 @@ namespace MailRuCloudApi.Api
                 request.UserAgent = ConstSettings.UserAgent;
                 request.AllowReadStreamBuffering = false;
 
-                var task = Task.Factory.FromAsync(request.BeginGetResponse,
-                    asyncResult => request.EndGetResponse(asyncResult), null);
-                await task.ContinueWith(
+                task = task.ContinueWith(task1 => request.GetResponse(), TaskContinuationOptions.OnlyOnRanToCompletion);
+
+                //var task = Task.Factory.FromAsync(request.BeginGetResponse, asyncResult => request.EndGetResponse(asyncResult), null);
+                task = task.ContinueWith(
                     (t, m) =>
                     {
                         var token = (CancellationToken)m;
@@ -89,7 +98,8 @@ namespace MailRuCloudApi.Api
                             try
                             {
                                 ReadResponseAsByte(t.Result, token, _innerStream);
-                                return _innerStream;
+                                return t.Result;
+                                //return _innerStream;
                             }
                             catch (Exception)
                             {
@@ -101,7 +111,14 @@ namespace MailRuCloudApi.Api
 
             }
 
-            _innerStream.Flush();
+            task = task.ContinueWith(task1 =>
+            {
+                _innerStream.Flush();
+                return (WebResponse) null;
+            }, TaskContinuationOptions.OnlyOnRanToCompletion);
+
+
+            //_innerStream.Flush();
             return _innerStream;
         }
 
@@ -172,7 +189,7 @@ namespace MailRuCloudApi.Api
             {
                 if (_start != null && _end != null)
                 {
-                    var l = _end.Value - _start.Value + 1;
+                    var l = _end.Value - _start.Value;
                     return l;
                 }
 

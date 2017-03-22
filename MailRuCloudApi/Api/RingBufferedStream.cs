@@ -18,6 +18,9 @@ namespace MailRuCloudApi.Api
 
         private readonly ManualResetEventAsync _readAvailable = new ManualResetEventAsync(false);
 
+        private readonly ManualResetEvent _flushed = new ManualResetEvent(false);
+
+
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         private int _readPos;
@@ -29,9 +32,6 @@ namespace MailRuCloudApi.Api
         private int _writeAvailableByteCount;
 
         private bool _disposed;
-
-
-        private readonly ManualResetEvent _flushed = new ManualResetEvent(false);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RingBufferedStream"/>

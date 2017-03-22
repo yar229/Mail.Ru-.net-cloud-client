@@ -20,13 +20,16 @@ namespace MailRuCloudApi.Api
 
         private RingBufferedStream _innerStream;
 
-
         public DownloadStream(IList<File> files, CloudApi cloud, long? start, long? end)
         {
             _files = files;
             _cloud = cloud;
             _start = start;
             _end = end;
+
+            Length = _start != null && _end != null
+                ? _end.Value - _start.Value + 1
+                : _files.Sum(f => f.Size.DefaultValue);
 
             _shard = _cloud.GetShardInfo(ShardType.Get).Result;
 
@@ -68,9 +71,7 @@ namespace MailRuCloudApi.Api
                     continue;
                 }
 
-                //var instart = Math.Min(0, glostart - fileStart);
                 var instart = Math.Max(0, glostart - fileStart);
-                //var instart = Math.Min(0, Math.Abs(glostart - fileStart));
                 var inend = Math.Min(file.Size.DefaultValue, gloend - fileStart);
 
                 request.Headers.Add("Accept-Ranges", "bytes");
@@ -183,21 +184,7 @@ namespace MailRuCloudApi.Api
         public override bool CanSeek { get; } = true;
         public override bool CanWrite { get; } = false;
 
-        public override long Length
-        {
-            get
-            {
-                if (_start != null && _end != null)
-                {
-                    var l = _end.Value - _start.Value + 1;
-                    return l;
-                }
-
-                //return _files.Size.DefaultValue;
-                return _files.Sum(f => f.Size.DefaultValue);
-
-            }
-        }
+        public override long Length { get; }
 
         public override long Position { get; set; }
     }

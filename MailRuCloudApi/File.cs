@@ -114,7 +114,7 @@ namespace MailRuCloudApi
         public void SetName(string destinationName)
         {
             string path = WebDavPath.Parent(FullPath);
-            FullPath = WebDavPath.Combine(path, destinationName); ;
+            FullPath = WebDavPath.Combine(path, destinationName);
             if (Files.Count > 1)
                 foreach (var fiFile in Files)
                 {
@@ -124,7 +124,7 @@ namespace MailRuCloudApi
 
         public void SetPath(string fullPath)
         {
-            FullPath = WebDavPath.Combine(fullPath, Name); ;
+            FullPath = WebDavPath.Combine(fullPath, Name);
             if (Files.Count > 1)
                 foreach (var fiFile in Files)
                 {

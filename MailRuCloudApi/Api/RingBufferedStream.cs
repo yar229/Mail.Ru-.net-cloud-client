@@ -31,7 +31,7 @@ namespace MailRuCloudApi.Api
         private bool _disposed;
 
 
-        private ManualResetEvent _flushed = new ManualResetEvent(false);
+        private readonly ManualResetEvent _flushed = new ManualResetEvent(false);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RingBufferedStream"/>

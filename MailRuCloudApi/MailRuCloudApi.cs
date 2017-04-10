@@ -56,8 +56,8 @@ namespace MailRuCloudApi
             var data = await new AccountInfoRequest(CloudApi).MakeRequestAsync();
             var res = new DiskUsage
             {
-                Total = data.body.cloud.space.total,
-                Used = data.body.cloud.space.used
+                Total = data.body.cloud.space.total * 1024 * 1024,
+                Used = data.body.cloud.space.used * 1024 * 1024
             };
             return res;
         }

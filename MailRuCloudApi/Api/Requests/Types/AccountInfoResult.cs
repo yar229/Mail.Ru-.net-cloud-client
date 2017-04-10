@@ -29,8 +29,8 @@ namespace MailRuCloudApi.Api.Requests.Types
     public class Space
     {
         public bool overquota { get; set; }
-        public int used { get; set; }
-        public int total { get; set; }
+        public long used { get; set; }
+        public long total { get; set; }
     }
 
     public class Billing

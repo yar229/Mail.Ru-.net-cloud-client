@@ -76,7 +76,7 @@ namespace MailRuCloudApi.Api
                 task = task.ContinueWith(task1 =>
                 {
                     
-                    WebResponse response = null;
+                    WebResponse response;
                     int cnt = 0;
                     while (true)
                     {
@@ -101,15 +101,8 @@ namespace MailRuCloudApi.Api
                             if (wex.Status == WebExceptionStatus.ProtocolError)
                             {
                                 var wexresp = wex.Response as HttpWebResponse;
-                                if (wexresp != null && wexresp.StatusCode == HttpStatusCode.GatewayTimeout)
-                                {
-                                    cnt++;
-                                    if (cnt >= 3)
-                                    {
-                                        _innerStream.Close();
-                                        throw;
-                                    }
-                                }
+                                if (wexresp != null && wexresp.StatusCode == HttpStatusCode.GatewayTimeout && ++cnt <= 3)
+                                    continue;
                             }
                             _innerStream.Close();
                             throw;
@@ -119,7 +112,7 @@ namespace MailRuCloudApi.Api
 
                     using (Stream responseStream = response.GetResponseStream()) //ReadResponseAsByte(response, CancellationToken.None, _innerStream);
                     {
-                        responseStream.CopyTo(_innerStream);
+                        responseStream?.CopyTo(_innerStream);
                     }
 
                     return response;

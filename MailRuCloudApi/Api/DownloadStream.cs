@@ -60,66 +60,80 @@ namespace MailRuCloudApi.Api
 
             foreach (var file in _files)
             {
-                //TODO: refact
-                var request = (HttpWebRequest)WebRequest.Create($"{_shard.Url}{Uri.EscapeDataString(file.FullPath)}");
+                var clofile = file;
 
-                fileEnd += file.Size.DefaultValue;
+                fileEnd += clofile.Size.DefaultValue;
 
                 if (glostart >= fileEnd || gloend <= fileStart)
                 {
-                    fileStart += file.Size.DefaultValue;
+                    fileStart += clofile.Size.DefaultValue;
                     continue;
                 }
-
+                
                 var instart = Math.Max(0, glostart - fileStart);
-                var inend = Math.Min(file.Size.DefaultValue, gloend - fileStart);
+                var inend = Math.Min(clofile.Size.DefaultValue, gloend - fileStart);
+                
+                task = task.ContinueWith(task1 =>
+                {
+                    
+                    WebResponse response = null;
+                    int cnt = 0;
+                    while (true)
+                    {
+                        try
+                        {
+                            var request = (HttpWebRequest)WebRequest.Create($"{_shard.Url}{Uri.EscapeDataString(file.FullPath)}");
+                            request.Headers.Add("Accept-Ranges", "bytes");
+                            request.AddRange(instart, inend);
+                            request.Proxy = _cloud.Account.Proxy;
+                            request.CookieContainer = _cloud.Account.Cookies;
+                            request.Method = "GET";
+                            request.ContentType = "application/octet-stream";//ConstSettings.DefaultRequestType;
+                            request.Accept = "*/*";
+                            request.UserAgent = ConstSettings.UserAgent;
+                            request.AllowReadStreamBuffering = false;
 
-                request.Headers.Add("Accept-Ranges", "bytes");
-                request.AddRange(instart, inend);
+                            response = request.GetResponse();
+                            break;
+                        }
+                        catch (WebException wex)
+                        {
+                            if (wex.Status == WebExceptionStatus.ProtocolError)
+                            {
+                                var wexresp = wex.Response as HttpWebResponse;
+                                if (wexresp != null && wexresp.StatusCode == HttpStatusCode.GatewayTimeout)
+                                {
+                                    cnt++;
+                                    if (cnt >= 3)
+                                    {
+                                        _innerStream.Close();
+                                        throw;
+                                    }
+                                }
+                            }
+                            _innerStream.Close();
+                            throw;
+                        }
+                        
+                    }
+
+                    using (Stream responseStream = response.GetResponseStream()) //ReadResponseAsByte(response, CancellationToken.None, _innerStream);
+                    {
+                        responseStream.CopyTo(_innerStream);
+                    }
+
+                    return response;
+                }, TaskContinuationOptions.OnlyOnRanToCompletion);
 
                 fileStart += file.Size.DefaultValue;
-
-
-                request.Proxy = _cloud.Account.Proxy;
-                request.CookieContainer = _cloud.Account.Cookies;
-                request.Method = "GET";
-                request.ContentType = "application/octet-stream";//ConstSettings.DefaultRequestType;
-                request.Accept = "*/*";
-                request.UserAgent = ConstSettings.UserAgent;
-                request.AllowReadStreamBuffering = false;
-
-                task = task.ContinueWith(task1 => request.GetResponse(), TaskContinuationOptions.OnlyOnRanToCompletion);
-
-                //var task = Task.Factory.FromAsync(request.BeginGetResponse, asyncResult => request.EndGetResponse(asyncResult), null);
-                task = task.ContinueWith(
-                    (t, m) =>
-                    {
-                        var token = (CancellationToken)m;
-                        {
-                            try
-                            {
-                                ReadResponseAsByte(t.Result, token, _innerStream);
-                                return t.Result;
-                                //return _innerStream;
-                            }
-                            catch (Exception)
-                            {
-                                return null;
-                            }
-                        }
-                    },
-                    _cloud.CancelToken.Token, TaskContinuationOptions.OnlyOnRanToCompletion);
-
             }
 
             task = task.ContinueWith(task1 =>
             {
                 _innerStream.Flush();
-                return (WebResponse) null;
+                return (WebResponse)null;
             }, TaskContinuationOptions.OnlyOnRanToCompletion);
 
-
-            //_innerStream.Flush();
             return _innerStream;
         }
 
@@ -130,28 +144,28 @@ namespace MailRuCloudApi.Api
             base.Close();
         }
 
-        private void ReadResponseAsByte(WebResponse resp, CancellationToken token, Stream outputStream = null)
-        {
-            using (Stream responseStream = resp.GetResponseStream())
-            {
-                var buffer = new byte[65536];
-                int bytesRead;
-                int totalRead = 0;
+        //private void ReadResponseAsByte(WebResponse resp, CancellationToken token, Stream outputStream = null)
+        //{
+        //    using (Stream responseStream = resp.GetResponseStream())
+        //    {
+        //        var buffer = new byte[65536];
+        //        int bytesRead;
+        //        int totalRead = 0;
 
-                while (responseStream != null && (bytesRead = responseStream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    token.ThrowIfCancellationRequested();
+        //        while (responseStream != null && (bytesRead = responseStream.Read(buffer, 0, buffer.Length)) > 0)
+        //        {
+        //            token.ThrowIfCancellationRequested();
 
-                    if (totalRead + bytesRead > Length)
-                    {
-                        bytesRead = (int)(Length - totalRead);
-                    }
-                    totalRead += bytesRead;
+        //            if (totalRead + bytesRead > Length)
+        //            {
+        //                bytesRead = (int)(Length - totalRead);
+        //            }
+        //            totalRead += bytesRead;
 
-                    outputStream?.Write(buffer, 0, bytesRead);
-                }
-            }
-        }
+        //            outputStream?.Write(buffer, 0, bytesRead);
+        //        }
+        //    }
+        //}
 
 
         public override void Flush()

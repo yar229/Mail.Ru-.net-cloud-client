@@ -8,7 +8,7 @@ using MailRuCloudApi.Api.Requests.Types;
 namespace MailRuCloudApi.Api.Requests
 {
     //class SecondStepAuthRequest
-    class SecondStepAuthRequest : BaseRequest<AuthTokenResult>
+    class SecondStepAuthRequest : BaseRequest<string>
     {
         private readonly string _csrf;
         private readonly string _login;
@@ -25,7 +25,7 @@ namespace MailRuCloudApi.Api.Requests
         {
             get
             {
-                const string uri = "/cgi-bin/secstep";
+                string uri = $"{ConstSettings.AuthDomain}/cgi-bin/secstep";
                 return uri;
             }
         }

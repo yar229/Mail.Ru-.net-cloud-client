@@ -47,6 +47,7 @@
     <Compile Include="Api\ConstSettings.cs" />
     <Compile Include="Api\DownloadStream.cs" />
     <Compile Include="Api\Requests\LoginRequest.cs" />
+    <Compile Include="Api\Requests\SecondStepAuthRequest.cs" />
     <Compile Include="Api\SplittedUploadStream.cs" />
     <Compile Include="Api\UploadStream.cs" />
     <Compile Include="CarotCryptStream.cs" />

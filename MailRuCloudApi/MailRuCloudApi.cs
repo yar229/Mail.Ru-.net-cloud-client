@@ -12,6 +12,7 @@ using MailRuCloudApi.Api;
 using MailRuCloudApi.Api.Requests;
 using MailRuCloudApi.Extensions;
 
+
 namespace MailRuCloudApi
 {
 
@@ -24,14 +25,16 @@ namespace MailRuCloudApi
 
         public CloudApi CloudApi { get; }
 
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MailRuCloud" /> class.
         /// </summary>
         /// <param name="login">Login name as the email.</param>
         /// <param name="password">Password, associated with this email.</param>
-        public MailRuCloud(string login, string password)
+        /// <param name="twoFaHandler"></param>
+        public MailRuCloud(string login, string password, ITwoFaHandler twoFaHandler)
         {
-            CloudApi = new CloudApi(login, password);
+            CloudApi = new CloudApi(login, password, twoFaHandler);
         }
 
         /// <summary>

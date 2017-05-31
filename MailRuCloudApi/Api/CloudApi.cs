@@ -23,9 +23,9 @@ namespace MailRuCloudApi.Api
         public Account Account { get; set; }
 
 
-        public CloudApi(string login, string password)
+        public CloudApi(string login, string password, ITwoFaHandler twoFaHandler)
         {
-            Account = new Account(this, login, password);
+            Account = new Account(this, login, password, twoFaHandler);
             if (!Account.Login())
             {
                 throw new AuthenticationException("Auth token has't been retrieved.");

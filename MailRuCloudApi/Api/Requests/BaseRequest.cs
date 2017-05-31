@@ -8,6 +8,12 @@ using Newtonsoft.Json;
 
 namespace MailRuCloudApi.Api.Requests
 {
+    //public class ResponseInfo<T>
+    //{
+    //    public Uri ResponseUri { get; set; }
+    //    public T Data { get; set; }
+    //}
+
     public abstract class BaseRequest<T> where T : class
     {
 
@@ -84,7 +90,7 @@ namespace MailRuCloudApi.Api.Requests
         }
 
 
-        protected RequestResponse<T> DeserializeMessage(string json)
+        protected virtual RequestResponse<T> DeserializeMessage(string json)
         {
 
             var msg = new RequestResponse<T>

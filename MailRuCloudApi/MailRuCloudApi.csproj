@@ -47,6 +47,7 @@
     <Compile Include="Api\ConstSettings.cs" />
     <Compile Include="Api\DownloadStream.cs" />
     <Compile Include="Api\Requests\LoginRequest.cs" />
+    <Compile Include="Api\Requests\Types\LoginResult.cs" />
     <Compile Include="Api\Requests\SecondStepAuthRequest.cs" />
     <Compile Include="Api\SplittedUploadStream.cs" />
     <Compile Include="Api\UploadStream.cs" />
@@ -88,9 +89,9 @@
     <Compile Include="ShardInfo.cs" />
     <Compile Include="SplittedCloud.cs" />
     <Compile Include="SplittedFile.cs" />
+    <Compile Include="TwoFAHandler.cs" />
     <Compile Include="WebDavPath.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Text;
 
 namespace MailRuCloudApi.Api.Requests
 {
-    class LoginRequest : BaseRequest<string>
+    class LoginRequest : BaseRequest<LoginResult>
     {
         private readonly string _login;
         private readonly string _password;
@@ -29,6 +30,23 @@ namespace MailRuCloudApi.Api.Requests
             string data = $"Login={Uri.EscapeUriString(_login)}&Domain={ConstSettings.Domain}&Password={Uri.EscapeUriString(_password)}";
 
             return Encoding.UTF8.GetBytes(data);
+        }
+
+        protected override RequestResponse<LoginResult> DeserializeMessage(string responseText)
+        {
+            var csrf = responseText.Contains("csrf")
+                ? new string(responseText.Split(new[] {"csrf"}, StringSplitOptions.None)[1].Split(',')[0].Where(char.IsLetterOrDigit).ToArray())
+                : string.Empty;
+
+            var msg = new RequestResponse<LoginResult>
+            {
+                Ok = true,
+                Result = new LoginResult
+                {
+                    Csrf = csrf
+                }
+            };
+            return msg;
         }
     }
 }

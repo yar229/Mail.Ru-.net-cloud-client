@@ -32,7 +32,7 @@ namespace MailRuCloudApi.Api.Requests
 
         protected override byte[] CreateHttpContent()
         {
-            string data = $"csrf={_csrf}&Login={Uri.EscapeUriString(_login)}& AuthCode={_authCode}";
+            string data = $"csrf={_csrf}&Login={Uri.EscapeUriString(_login)}&AuthCode={_authCode}";
 
             return Encoding.UTF8.GetBytes(data);
         }

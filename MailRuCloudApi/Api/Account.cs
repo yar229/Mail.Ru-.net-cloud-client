@@ -18,13 +18,17 @@ namespace MailRuCloudApi.Api
         /// </summary>
         private CookieContainer _cookies;
 
+        //private readonly AuthCodeWindow _authCodeHandler = new AuthCodeWindow();
+        private readonly ITwoFaHandler _twoFaHandler;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Account" /> class.
         /// </summary>
         /// <param name="cloudApi"></param>
         /// <param name="login">Login name as email.</param>
         /// <param name="password">Password related with this login</param>
-        public Account(CloudApi cloudApi, string login, string password)
+        /// <param name="twoFaHandler"></param>
+        public Account(CloudApi cloudApi, string login, string password, ITwoFaHandler twoFaHandler)
         {
             _cloudApi = cloudApi;
             LoginName = login;
@@ -32,6 +36,10 @@ namespace MailRuCloudApi.Api
 
             WebRequest.DefaultWebProxy.Credentials = CredentialCache.DefaultCredentials;
             Proxy = WebRequest.DefaultWebProxy;
+
+            _twoFaHandler = twoFaHandler;
+            if (_twoFaHandler != null)
+                AuthCodeRequiredEvent += _twoFaHandler.Get;
         }
 
         /// <summary>
@@ -91,8 +99,16 @@ namespace MailRuCloudApi.Api
                 throw new ArgumentException("Password is null or empty.");
             }
 
-            await new LoginRequest(_cloudApi, LoginName, Password)
+            var loginResult = await new LoginRequest(_cloudApi, LoginName, Password)
                 .MakeRequestAsync();
+
+            // 2FA
+            if (!string.IsNullOrEmpty(loginResult.Csrf))
+            {
+                string authCode = OnAuthCodeRequired(LoginName);
+                await new SecondStepAuthRequest(_cloudApi, loginResult.Csrf, LoginName, authCode)
+                    .MakeRequestAsync();
+            }
 
             await new EnsureSdcCookieRequest(_cloudApi)
                 .MakeRequestAsync();
@@ -112,6 +128,8 @@ namespace MailRuCloudApi.Api
             return true;
         }
 
+
+
         public DateTime Expires { get; private set; }
 
         /// <summary>
@@ -127,6 +145,14 @@ namespace MailRuCloudApi.Api
                     throw new AuthenticationException("Auth token has't been retrieved.");
         }
 
+
+        public delegate string AuthCodeRequiredDelegate(string login);
+
+        public event AuthCodeRequiredDelegate AuthCodeRequiredEvent;
+        protected virtual string OnAuthCodeRequired(string login)
+        {
+            return AuthCodeRequiredEvent?.Invoke(login);
+        }
     }
 
     public static class Extensions

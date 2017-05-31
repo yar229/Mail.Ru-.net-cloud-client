@@ -6,7 +6,7 @@ namespace MailRuCloudApi
 {
     public class SplittedCloud : MailRuCloud
     {
-        public SplittedCloud(string login, string password) : base(login, password)
+        public SplittedCloud(string login, string password, ITwoFaHandler twoFaHandler) : base(login, password, twoFaHandler)
         {
         }
 

@@ -1,7 +1,14 @@
 ﻿namespace MailRuCloudApi
 {
+    public class TwoFaCodeResult
+    {
+        public string Code { get; set; }
+        public bool DoNotAskAgainForThisDevice { get; set; }
+
+    }
+
     public interface ITwoFaHandler
     {
-        string Get(string login, bool isAutoRelogin);
+        TwoFaCodeResult Get(string login, bool isAutoRelogin);
     }
 }

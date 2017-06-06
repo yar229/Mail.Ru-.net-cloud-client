@@ -43,13 +43,13 @@ namespace MailRuCloudApi
         /// Gets number of folders in folder.
         /// </summary>
         /// <value>Number of folders.</value>
-        public int NumberOfFolders { get; internal set; }
+        public int NumberOfFolders { get; }
 
         /// <summary>
         /// Gets number of files in folder.
         /// </summary>
         /// <value>Number of files.</value>
-        public int NumberOfFiles { get; internal set; }
+        public int NumberOfFiles { get; }
 
         /// <summary>
         /// Gets folder name.
@@ -61,7 +61,7 @@ namespace MailRuCloudApi
         /// Gets folder size.
         /// </summary>
         /// <value>Folder size.</value>
-        public FileSize Size { get; set; }
+        public FileSize Size { get; }
 
         /// <summary>
         /// Gets full folder path on the server.
@@ -76,7 +76,7 @@ namespace MailRuCloudApi
         /// Gets public folder link.
         /// </summary>
         /// <value>Public link.</value>
-        public string PublicLink { get; internal set; }
+        public string PublicLink { get; }
 
         public DateTime CreationTimeUtc { get; set; } = DateTime.Now.AddDays(-1);
 

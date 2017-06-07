@@ -86,7 +86,10 @@ namespace MailRuCloudApi.Extensions
                             LastWriteTimeUtc = UnixTimeStampToDateTime(it.mtime),
                         }).ToList(),
                     data.body.home)
-                {Size = data.body.size};
+            {
+                Size = data.body.size,
+                WebLink = data.body.weblink
+            };
 
             return entry;
         }

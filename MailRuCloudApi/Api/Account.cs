@@ -58,7 +58,11 @@ namespace MailRuCloudApi.Api
         /// Gets account cookies.
         /// </summary>
         /// <value>Account cookies.</value>
-        public CookieContainer Cookies => _cookies ?? (_cookies = new CookieContainer());
+        public CookieContainer Cookies
+        {
+            get => _cookies ?? (_cookies = new CookieContainer());
+            set => _cookies = value;
+        }
 
         /// <summary>
         /// Gets or sets login name.

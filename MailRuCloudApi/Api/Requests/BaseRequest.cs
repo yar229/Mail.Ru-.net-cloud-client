@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq.Expressions;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -60,27 +61,45 @@ namespace MailRuCloudApi.Api.Requests
                 stream.Write(content, 0, content.Length);
             }
 
-            using (var response = (HttpWebResponse)await Task.Factory.FromAsync(httprequest.BeginGetResponse, asyncResult => httprequest.EndGetResponse(asyncResult), null))
+            try
             {
-
-                if ((int)response.StatusCode >= 500)
-                    throw new RequestException("Server fault") {StatusCode = response.StatusCode}; // Let's throw exception. It's server fault
-
-                var responseText = ReadResponseAsText(response, CloudApi.CancelToken.Token); //await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                var result = DeserializeMessage(responseText);
-                if (!result.Ok || response.StatusCode != HttpStatusCode.OK)
+                using (var response = (HttpWebResponse) await Task.Factory.FromAsync(httprequest.BeginGetResponse,
+                    asyncResult => httprequest.EndGetResponse(asyncResult), null))
                 {
-                    var exceptionMessage = $"Request failed (status code {(int)response.StatusCode}): {result.Description}";
-                    throw new RequestException(exceptionMessage)
+
+                    if ((int) response.StatusCode >= 500)
+                        throw new RequestException("Server fault")
+                        {
+                            StatusCode = response.StatusCode
+                        }; // Let's throw exception. It's server fault
+
+                    var responseText =
+                        ReadResponseAsText(response,
+                            CloudApi.CancelToken
+                                .Token); //await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var result = DeserializeMessage(responseText);
+                    if (!result.Ok || response.StatusCode != HttpStatusCode.OK)
                     {
-                        StatusCode = response.StatusCode,
-                        ResponseBody = responseText,
-                        Description = result.Description,
-                        ErrorCode = result.ErrorCode
-                    };
+                        var exceptionMessage =
+                            $"Request failed (status code {(int) response.StatusCode}): {result.Description}";
+                        throw new RequestException(exceptionMessage)
+                        {
+                            StatusCode = response.StatusCode,
+                            ResponseBody = responseText,
+                            Description = result.Description,
+                            ErrorCode = result.ErrorCode
+                        };
+                    }
+
+                    //CloudApi.Account.Cookies.Add(response.Cookies);
+
+                    var retVal = result.Result;
+                    return retVal;
                 }
-                var retVal = result.Result;
-                return retVal;
+            }
+            catch (Exception e)
+            {
+                throw;
             }
         }
 

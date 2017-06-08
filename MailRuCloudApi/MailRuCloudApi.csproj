@@ -40,6 +40,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccountInfo.cs" />
@@ -52,6 +53,7 @@
     <Compile Include="Api\SplittedUploadStream.cs" />
     <Compile Include="Api\UploadStream.cs" />
     <Compile Include="CarotCryptStream.cs" />
+    <Compile Include="CookieManager\DiskCookieManager.cs" />
     <Compile Include="DiskUsage.cs" />
     <Compile Include="Entry.cs" />
     <Compile Include="Extensions\DtoImport.cs" />
@@ -59,6 +61,7 @@
     <Compile Include="File.cs" />
     <Compile Include="FileSize.cs" />
     <Compile Include="Folder.cs" />
+    <Compile Include="CookieManager\ICookieManager.cs" />
     <Compile Include="MailRuCloudApi.cs" />
     <Compile Include="Api\CloudApi.cs" />
     <Compile Include="Api\Requests\AccountInfoRequest.cs" />

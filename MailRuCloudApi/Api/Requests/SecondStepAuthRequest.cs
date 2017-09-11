@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using MailRuCloudApi.Api.Requests.Types;
 
 namespace MailRuCloudApi.Api.Requests
 {
+    //class SecondStepAuthRequest
     class SecondStepAuthRequest : BaseRequest<string>
     {
         private readonly string _csrf;

@@ -6,8 +6,8 @@
 
         public long FileSizeLimit
         {
-            get => _fileSizeLimit <= 0 ? long.MaxValue : _fileSizeLimit;
-            set => _fileSizeLimit = value;
+            get { return _fileSizeLimit <= 0 ? long.MaxValue : _fileSizeLimit; }
+            set { _fileSizeLimit = value; }
         }
     }
 }

@@ -56,7 +56,6 @@ namespace MailRuCloudApi.Api.Requests.Types
         public string type { get; set; }
         public string home { get; set; }
         public List<Props> list { get; set; }
-        public string weblink { get; set; }
     }
 
 }

@@ -9,8 +9,7 @@ namespace MailRuCloudApi
     {
         public SplittedCloud(string login, string password, ITwoFaHandler twoFaHandler, CookieContainer cc) : base(login, password, twoFaHandler)
         {
-            if (cc != null && cc.Count > 0)
-                CloudApi.Account.Cookies = cc;
+            this.CloudApi.Account.Cookies = cc;
         }
 
         public override async Task<Entry> GetItems(string path)

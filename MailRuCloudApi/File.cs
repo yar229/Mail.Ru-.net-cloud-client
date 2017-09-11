@@ -46,8 +46,8 @@ namespace MailRuCloudApi
         /// <value>File hash.</value>
         public virtual string Hash
         {
-            get { return _hash; }
-            internal set { _hash = value; }
+            get => _hash;
+            internal set => _hash = value;
         }
 
         /// <summary>
@@ -56,8 +56,8 @@ namespace MailRuCloudApi
         /// <value>File size.</value>
         public virtual FileSize Size
         {
-            get { return _size; }
-            set { _size = value; }
+            get => _size;
+            set => _size = value;
         }
 
         /// <summary>
@@ -66,10 +66,7 @@ namespace MailRuCloudApi
         /// <value>Full file path.</value>
         public string FullPath
         {
-            get
-            {
-                return _fullPath;
-            }
+            get => _fullPath;
             set
             {
                 _fullPath = value.Replace("\\", "/");

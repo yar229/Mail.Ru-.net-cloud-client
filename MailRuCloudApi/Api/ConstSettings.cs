@@ -5,7 +5,7 @@ namespace MailRuCloudApi.Api
 {
     public static class ConstSettings
     {
-        public static string[] AvailDomains = {"mail", "inbox", "bk"};
+        public static readonly string[] AvailDomains = {"mail", "inbox", "bk"};
 
         public const string Domain = "mail.ru";
         public const string CloudDomain = "https://cloud.mail.ru";
@@ -596,8 +596,7 @@ namespace MailRuCloudApi.Api
                 extension = "." + extension;
             }
 
-            string mime;
-            return MimeTypesList.TryGetValue(extension, out mime) ? mime : "application/octet-stream";
+            return MimeTypesList.TryGetValue(extension, out var mime) ? mime : "application/octet-stream";
         }
     }
 }

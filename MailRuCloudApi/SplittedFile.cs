@@ -10,7 +10,7 @@ namespace MailRuCloudApi
         public SplittedFile(IList<File> files)
         {
             FileHeader = files.First(f => !Regex.Match(f.Name, @".wdmrc.\d\d\d\Z").Success);
-            FileParts.AddRange(files
+            _fileParts.AddRange(files
                 .Where(f => Regex.Match(f.Name, @".wdmrc.\d\d\d\Z").Success)
                 .OrderBy(f => f.Name));
 
@@ -18,7 +18,7 @@ namespace MailRuCloudApi
         }
 
 
-        public override FileSize Size => FileParts.Sum(f => f.Size.DefaultValue);
+        public override FileSize Size => _fileParts.Sum(f => f.Size.DefaultValue);
 
         public override string Hash => FileHeader.Hash;
 
@@ -26,9 +26,9 @@ namespace MailRuCloudApi
         public override DateTime LastWriteTimeUtc => FileHeader.LastWriteTimeUtc;
         public override DateTime LastAccessTimeUtc => FileHeader.LastAccessTimeUtc;
 
-        public override List<File> Files => FileParts;
+        public override List<File> Files => _fileParts;
 
-        public File FileHeader { get; set; }
-        public List<File> FileParts = new List<File>();
+        private File FileHeader { get; }
+        private readonly List<File> _fileParts = new List<File>();
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace MailRuCloudApi.Api
@@ -101,8 +100,7 @@ namespace MailRuCloudApi.Api
                         {
                             if (wex.Status == WebExceptionStatus.ProtocolError)
                             {
-                                var wexresp = wex.Response as HttpWebResponse;
-                                if (wexresp != null && wexresp.StatusCode == HttpStatusCode.GatewayTimeout && ++cnt <= 3)
+                                if (wex.Response is HttpWebResponse wexresp && wexresp.StatusCode == HttpStatusCode.GatewayTimeout && ++cnt <= 3)
                                     continue;
                             }
                             _innerStream.Close();

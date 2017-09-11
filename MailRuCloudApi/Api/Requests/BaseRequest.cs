@@ -8,12 +8,6 @@ using Newtonsoft.Json;
 
 namespace MailRuCloudApi.Api.Requests
 {
-    //public class ResponseInfo<T>
-    //{
-    //    public Uri ResponseUri { get; set; }
-    //    public T Data { get; set; }
-    //}
-
     public abstract class BaseRequest<T> where T : class
     {
 
@@ -101,7 +95,7 @@ namespace MailRuCloudApi.Api.Requests
             return msg;
         }
 
-        public static string ReadResponseAsText(WebResponse resp, CancellationToken token)
+        private static string ReadResponseAsText(WebResponse resp, CancellationToken token)
         {
             using (var stream = new MemoryStream())
             {
@@ -118,7 +112,7 @@ namespace MailRuCloudApi.Api.Requests
             }
         }
 
-        public static void ReadResponseAsByte(WebResponse resp, CancellationToken token, Stream outputStream = null, long contentLength = 0)
+        private static void ReadResponseAsByte(WebResponse resp, CancellationToken token, Stream outputStream = null)
         {
             int bufSizeChunk = 30000;
             int totalBufSize = bufSizeChunk;

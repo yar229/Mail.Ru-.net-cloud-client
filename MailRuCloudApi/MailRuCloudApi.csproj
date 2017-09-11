@@ -59,7 +59,7 @@
     <Compile Include="File.cs" />
     <Compile Include="FileSize.cs" />
     <Compile Include="Folder.cs" />
-    <Compile Include="MailRuCloudApi.cs" />
+    <Compile Include="MailRuCloud.cs" />
     <Compile Include="Api\CloudApi.cs" />
     <Compile Include="Api\Requests\AccountInfoRequest.cs" />
     <Compile Include="Api\Requests\AuthTokenRequest.cs" />

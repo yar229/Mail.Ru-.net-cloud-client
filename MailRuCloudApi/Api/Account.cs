@@ -19,7 +19,6 @@ namespace MailRuCloudApi.Api
         private CookieContainer _cookies;
 
         //private readonly AuthCodeWindow _authCodeHandler = new AuthCodeWindow();
-        private readonly ITwoFaHandler _twoFaHandler;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Account" /> class.
@@ -37,9 +36,9 @@ namespace MailRuCloudApi.Api
             WebRequest.DefaultWebProxy.Credentials = CredentialCache.DefaultCredentials;
             Proxy = WebRequest.DefaultWebProxy;
 
-            _twoFaHandler = twoFaHandler;
-            if (_twoFaHandler != null)
-                AuthCodeRequiredEvent += _twoFaHandler.Get;
+            var twoFaHandler1 = twoFaHandler;
+            if (twoFaHandler1 != null)
+                AuthCodeRequiredEvent += twoFaHandler1.Get;
         }
 
         /// <summary>
@@ -106,7 +105,7 @@ namespace MailRuCloudApi.Api
             if (!string.IsNullOrEmpty(loginResult.Csrf))
             {
                 string authCode = OnAuthCodeRequired(LoginName, false);
-                string res = await new SecondStepAuthRequest(_cloudApi, loginResult.Csrf, LoginName, authCode)
+                await new SecondStepAuthRequest(_cloudApi, loginResult.Csrf, LoginName, authCode)
                     .MakeRequestAsync();
             }
 

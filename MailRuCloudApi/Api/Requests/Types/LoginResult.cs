@@ -1,4 +1,4 @@
-﻿namespace MailRuCloudApi.Api.Requests
+﻿namespace MailRuCloudApi.Api.Requests.Types
 {
     class LoginResult
     {

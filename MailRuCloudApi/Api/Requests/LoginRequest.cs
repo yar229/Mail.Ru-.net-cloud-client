@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Text;
+using MailRuCloudApi.Api.Requests.Types;
 
 namespace MailRuCloudApi.Api.Requests
 {

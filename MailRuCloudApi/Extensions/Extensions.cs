@@ -41,8 +41,7 @@ namespace MailRuCloudApi.Extensions
             if (ex == null || t.IsInstanceOfType(ex))
                 return ex;
 
-            var ae = ex as AggregateException;
-            if (ae != null)
+            if (ex is AggregateException ae)
             {
                 foreach (var e in ae.InnerExceptions)
                 {

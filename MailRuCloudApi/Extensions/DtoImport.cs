@@ -65,13 +65,13 @@ namespace MailRuCloudApi.Extensions
             return res;
         }
 
-        private static readonly string[] _folderKinds = { "folder", "camera-upload", "mounted", "shared" };
+        private static readonly string[] FolderKinds = { "folder", "camera-upload", "mounted", "shared" };
 
         public static Entry ToEntry(this FolderInfoResult data)
         {
             var entry = new Entry(
                     data.body.list
-                        .Where(it => _folderKinds.Contains(it.kind))
+                        .Where(it => FolderKinds.Contains(it.kind))
                         .Select(it => new Folder(it.count.folders, it.count.files, it.size, it.home, string.IsNullOrEmpty(it.weblink) ? "" : ConstSettings.PublishFileLink + it.weblink))
                         .ToList(),
                     data.body.list

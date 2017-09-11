@@ -9,6 +9,6 @@
 
     public interface ITwoFaHandler
     {
-        TwoFaCodeResult Get(string login, string phone, bool isAutoRelogin);
+        TwoFaCodeResult Get(string login, bool isAutoRelogin);
     }
 }

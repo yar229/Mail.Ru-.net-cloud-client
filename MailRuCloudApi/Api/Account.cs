@@ -103,10 +103,10 @@ namespace MailRuCloudApi.Api
                 .MakeRequestAsync();
 
             // 2FA
-            if (!string.IsNullOrEmpty(loginResult.csrf))
+            if (!string.IsNullOrEmpty(loginResult.Csrf))
             {
-                var twoFaResult = OnAuthCodeRequired(LoginName, loginResult.secstep_phone, false);
-                string res = await new SecondStepAuthRequest(_cloudApi, loginResult.csrf, LoginName, twoFaResult.Code, twoFaResult.DoNotAskAgainForThisDevice)
+                var twoFaResult = OnAuthCodeRequired(LoginName, false);
+                string res = await new SecondStepAuthRequest(_cloudApi, loginResult.Csrf, LoginName, twoFaResult.Code, twoFaResult.DoNotAskAgainForThisDevice)
                     .MakeRequestAsync();
             }
 
@@ -146,12 +146,12 @@ namespace MailRuCloudApi.Api
         }
 
 
-        public delegate TwoFaCodeResult AuthCodeRequiredDelegate(string login, string phone, bool isAutoRelogin);
+        public delegate TwoFaCodeResult AuthCodeRequiredDelegate(string login, bool isAutoRelogin);
 
         public event AuthCodeRequiredDelegate AuthCodeRequiredEvent;
-        protected virtual TwoFaCodeResult OnAuthCodeRequired(string login, string phone, bool isAutoRelogin)
+        protected virtual TwoFaCodeResult OnAuthCodeRequired(string login, bool isAutoRelogin)
         {
-            return AuthCodeRequiredEvent?.Invoke(login, phone, isAutoRelogin);
+            return AuthCodeRequiredEvent?.Invoke(login, isAutoRelogin);
         }
     }
 

@@ -2,9 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Text.RegularExpressions;
 using MailRuCloudApi.Api.Requests.Types;
-using Newtonsoft.Json;
 
 namespace MailRuCloudApi.Api.Requests
 {
@@ -37,23 +35,17 @@ namespace MailRuCloudApi.Api.Requests
 
         protected override RequestResponse<LoginResult> DeserializeMessage(string responseText)
         {
-
-            LoginResult res = null;
-            var match = Regex.Match(responseText, @"(?snx-)<script\s*type=""text/html""\sid=""json"">(?<data>.*?)</script>");
-            if (match.Success)
-            {
-                res = JsonConvert.DeserializeObject<LoginResult>(match.Groups["data"].Value);
-            }
-            else res = new LoginResult();
-
-            //TODO: implement captcha
-            if (!string.IsNullOrEmpty(res.secstep_captcha))
-                throw new NotImplementedException("Two-step auth captcha not implemented");
+            var csrf = responseText.Contains("csrf")
+                ? new string(responseText.Split(new[] {"csrf"}, StringSplitOptions.None)[1].Split(',')[0].Where(char.IsLetterOrDigit).ToArray())
+                : string.Empty;
 
             var msg = new RequestResponse<LoginResult>
             {
                 Ok = true,
-                Result = res
+                Result = new LoginResult
+                {
+                    Csrf = csrf
+                }
             };
             return msg;
         }

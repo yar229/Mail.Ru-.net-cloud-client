@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -7,9 +6,8 @@ namespace MailRuCloudApi
 {
     public class SplittedCloud : MailRuCloud
     {
-        public SplittedCloud(string login, string password, ITwoFaHandler twoFaHandler, CookieContainer cc) : base(login, password, twoFaHandler)
+        public SplittedCloud(string login, string password, ITwoFaHandler twoFaHandler) : base(login, password, twoFaHandler)
         {
-            this.CloudApi.Account.Cookies = cc;
         }
 
         public override async Task<Entry> GetItems(string path)

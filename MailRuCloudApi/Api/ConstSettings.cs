@@ -3,8 +3,10 @@ using System.Collections.Generic;
 
 namespace MailRuCloudApi.Api
 {
-    public class ConstSettings
+    public static class ConstSettings
     {
+        public static string[] AvailDomains = {"mail", "inbox", "bk"};
+
         public const string Domain = "mail.ru";
         public const string CloudDomain = "https://cloud.mail.ru";
         public const string AuthDomain = "https://auth.mail.ru";

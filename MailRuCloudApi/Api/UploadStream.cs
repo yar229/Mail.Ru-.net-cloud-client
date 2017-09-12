@@ -50,7 +50,7 @@ namespace MailRuCloudApi.Api
             _request.CookieContainer = _cloud.Account.Cookies;
             _request.Method = "POST";
 
-            _request.ContentLength = _file.Size.DefaultValue + boundaryRequest.LongLength + _endBoundaryRequest.LongLength;
+            _request.ContentLength = _file.Size + boundaryRequest.LongLength + _endBoundaryRequest.LongLength;
 
             _request.Referer = $"{ConstSettings.CloudDomain}/home/{Uri.EscapeDataString(_file.Path)}";
             _request.Headers.Add("Origin", ConstSettings.CloudDomain);
@@ -193,7 +193,7 @@ namespace MailRuCloudApi.Api
 
         private async Task<bool> AddFileInCloud(File fileInfo, ResolveFileConflictMethod conflict = ResolveFileConflictMethod.Rewrite)
         {
-            await new CreateFileRequest(_cloud, fileInfo.FullPath, fileInfo.Hash, fileInfo.Size.DefaultValue, conflict)
+            await new CreateFileRequest(_cloud, fileInfo.FullPath, fileInfo.Hash, fileInfo.Size, conflict)
                 .MakeRequestAsync();
 
             return true;
@@ -308,7 +308,7 @@ namespace MailRuCloudApi.Api
         public override bool CanRead => true;
         public override bool CanSeek => true;
         public override bool CanWrite => true;
-        public override long Length => _file.Size.DefaultValue;
+        public override long Length => _file.Size;
         public override long Position { get; set; }
 
         public static long BytesCount(string value)

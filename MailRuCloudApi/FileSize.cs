@@ -37,6 +37,11 @@ namespace MailRuCloudApi
             return new FileSize(defaultValue);
         }
 
+        public static implicit operator long(FileSize fsize)
+        {
+            return fsize.DefaultValue;
+        }
+
         public static FileSize operator +(FileSize first, FileSize second)
         {
             return new FileSize(first.DefaultValue + second.DefaultValue);

@@ -18,7 +18,7 @@ namespace MailRuCloudApi
         }
 
 
-        public override FileSize Size => _fileParts.Sum(f => f.Size.DefaultValue);
+        public override FileSize Size => _fileParts.Sum(f => f.Size);
 
         public override string Hash => FileHeader.Hash;
 

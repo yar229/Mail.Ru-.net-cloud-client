@@ -28,7 +28,7 @@ namespace MailRuCloudApi.Api
 
             Length = _start != null && _end != null
                 ? _end.Value - _start.Value + 1
-                : _files.Sum(f => f.Size.DefaultValue);
+                : _files.Sum(f => f.Size);
 
             _shard = _cloud.GetShardInfo(ShardType.Get).Result;
 
@@ -61,11 +61,11 @@ namespace MailRuCloudApi.Api
             {
                 var clofile = file;
 
-                fileEnd += clofile.Size.DefaultValue;
+                fileEnd += clofile.Size;
 
                 if (glostart >= fileEnd || gloend <= fileStart)
                 {
-                    fileStart += clofile.Size.DefaultValue;
+                    fileStart += clofile.Size;
                     continue;
                 }
                 
@@ -117,7 +117,7 @@ namespace MailRuCloudApi.Api
                     return response;
                 }, TaskContinuationOptions.OnlyOnRanToCompletion);
 
-                fileStart += file.Size.DefaultValue;
+                fileStart += file.Size;
             }
 
             task = task.ContinueWith(task1 =>

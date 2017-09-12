@@ -68,7 +68,8 @@ namespace MailRuCloudApi.Api
                 return;
 
             _bytesWrote = 0;
-            _uploadStream = new UploadStream(_files[_currFileId].FullPath, _cloud, _files[_currFileId].Size.DefaultValue);
+            var currFile = _files[_currFileId];
+            _uploadStream = new UploadStream(currFile.FullPath, _cloud, currFile.Size);
         }
 
 
@@ -94,7 +95,7 @@ namespace MailRuCloudApi.Api
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            long diff = _bytesWrote + count - _files[_currFileId].Size.DefaultValue;
+            long diff = _bytesWrote + count - _files[_currFileId].Size;
 
             if (diff > 0)
             {

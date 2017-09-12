@@ -4,7 +4,7 @@ namespace MailRuCloudApi.SpecialCommands
     {
         public static SpecialCommand Build(MailRuCloud cloud, string param)
         {
-            return param != null && param.StartsWith("/>>")
+            return param != null && param.Contains("/>>")
                 ? new SharedFolderLinkCommand(cloud, param)
                 : null;
         }

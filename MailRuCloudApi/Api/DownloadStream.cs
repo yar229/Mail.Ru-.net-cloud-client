@@ -24,7 +24,9 @@ namespace MailRuCloudApi.Api
             _files = files;
             _cloud = cloud;
             _start = start;
-            _end = end;
+            
+            _globalLength = _files.Sum(f => f.Size);
+            _end = end >= _globalLength ? _globalLength - 1 : end;
 
             Length = _start != null && _end != null
                 ? _end.Value - _start.Value + 1
@@ -35,6 +37,7 @@ namespace MailRuCloudApi.Api
             Initialize();
         }
 
+        private long _globalLength;
 
         private void Initialize()
         {
@@ -71,7 +74,6 @@ namespace MailRuCloudApi.Api
                 
                 var instart = Math.Max(0, glostart - fileStart);
                 var inend = gloend - fileStart - 1; //Math.Min(clofile.Size.DefaultValue, gloend - fileStart);
-
 
                 task = task.ContinueWith(task1 =>
                 {

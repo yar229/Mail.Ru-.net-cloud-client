@@ -8,6 +8,20 @@ namespace MailRuCloudApi.Extensions
 {
     public static class DtoImport
     {
+        public static DiskUsage ToDiskUsage(this AccountInfoResult data)
+        {
+            var res = new DiskUsage
+            {
+                Total = data.body.cloud.space.total * 1024 * 1024,
+                Used = data.body.cloud.space.used * 1024 * 1024,
+                OverQuota = data.body.cloud.space.overquota
+            };
+            return res;
+        }
+
+
+
+
         public static ShardInfo ToShardInfo(this ShardInfoResult webdata, ShardType shardType)
         {
             List<ShardSection> shard;

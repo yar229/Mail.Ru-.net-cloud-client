@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Mime;
 using System.Threading.Tasks;
 
 namespace MailRuCloudApi.Api
@@ -88,7 +89,7 @@ namespace MailRuCloudApi.Api
                             request.Proxy = _cloud.Account.Proxy;
                             request.CookieContainer = _cloud.Account.Cookies;
                             request.Method = "GET";
-                            request.ContentType = "application/octet-stream";//ConstSettings.DefaultRequestType;
+                            request.ContentType =  MediaTypeNames.Application.Octet;
                             request.Accept = "*/*";
                             request.UserAgent = ConstSettings.UserAgent;
                             request.AllowReadStreamBuffering = false;

@@ -21,23 +21,21 @@ namespace MailRuCloudApi.Api
 
         public DownloadStream(IList<File> files, CloudApi cloud, long? start, long? end)
         {
-            _files = files;
+            var globalLength = files.Sum(f => f.Size);
+
             _cloud = cloud;
+            _shard = _cloud.GetShardInfo(ShardType.Get).Result;
+
+            _files = files;
             _start = start;
-            
-            _globalLength = _files.Sum(f => f.Size);
-            _end = end >= _globalLength ? _globalLength - 1 : end;
+            _end = end >= globalLength ? globalLength - 1 : end;
 
             Length = _start != null && _end != null
                 ? _end.Value - _start.Value + 1
-                : _files.Sum(f => f.Size);
-
-            _shard = _cloud.GetShardInfo(ShardType.Get).Result;
+                : globalLength;
 
             Initialize();
         }
-
-        private long _globalLength;
 
         private void Initialize()
         {

@@ -59,6 +59,7 @@
     <Compile Include="File.cs" />
     <Compile Include="FileSize.cs" />
     <Compile Include="Folder.cs" />
+    <Compile Include="PathResolve\FolderList.cs" />
     <Compile Include="MailRuCloud.cs" />
     <Compile Include="Api\CloudApi.cs" />
     <Compile Include="Api\Requests\AccountInfoRequest.cs" />
@@ -83,7 +84,9 @@
     <Compile Include="Api\Requests\Types\ShardInfoResult.cs" />
     <Compile Include="Api\Requests\Types\UnknownResult.cs" />
     <Compile Include="Api\RingBufferedStream.cs" />
+    <Compile Include="PathResolve\PathResolver.cs" />
     <Compile Include="ShardType.cs" />
+    <Compile Include="SpecialCommands\SharedFolderJoinCommand.cs" />
     <Compile Include="SpecialCommands\SharedFolderLinkCommand.cs" />
     <Compile Include="SpecialCommands\SpecialCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

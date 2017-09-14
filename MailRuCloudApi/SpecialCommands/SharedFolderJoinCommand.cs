@@ -1,3 +1,4 @@
+using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NWebDav.Server;
@@ -5,13 +6,13 @@ using NWebDav.Server.Stores;
 
 namespace MailRuCloudApi.SpecialCommands
 {
-    public class SharedFolderLinkCommand : SpecialCommand
+    public class SharedFolderJoinCommand: SpecialCommand
     {
         private readonly MailRuCloud _cloud;
         private readonly string _path;
         private readonly string _param;
 
-        public SharedFolderLinkCommand(MailRuCloud cloud, string path, string param)
+        public SharedFolderJoinCommand(MailRuCloud cloud, string path, string param)
         {
             _cloud = cloud;
             _path = path;
@@ -30,16 +31,21 @@ namespace MailRuCloudApi.SpecialCommands
             }
         }
 
+        //private string Path
+        //{
+        //    get
+        //    {
+        //        int pos = _param.LastIndexOf("/>>", StringComparison.Ordinal);
+        //        return pos > 0
+        //            ? _param.Substring(0, pos)
+        //            : "/";
+        //    }
+        //}
 
         public override Task<StoreCollectionResult> Execute()
         {
-            var m = Regex.Match(_param, @"(?snx-)link \s+ (?<url>https://?cloud.mail.ru/public/\w*/\w*)/? \s* (?<name>.*) ");
-            if (m.Success)
-            {
-                _cloud.LinkFolder(m.Groups["url"].Value, _path, m.Groups["name"].Value);
-            }
-
-            return Task.FromResult(new StoreCollectionResult(DavStatusCode.Created));
+            bool k = _cloud.CloneItem(_path, Value).Result;
+            return Task.FromResult(new StoreCollectionResult(k ? DavStatusCode.Created : DavStatusCode.PreconditionFailed));
         }
     }
 }

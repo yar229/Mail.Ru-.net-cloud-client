@@ -7,10 +7,12 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api;
 using MailRuCloudApi.Api.Requests;
 using MailRuCloudApi.Extensions;
+using MailRuCloudApi.PathResolve;
 
 
 namespace MailRuCloudApi
@@ -22,6 +24,9 @@ namespace MailRuCloudApi
     /// </summary>
     public class MailRuCloud : IDisposable
     {
+        private readonly PathResolver _pathResolver;
+
+
 
         public CloudApi CloudApi { get; }
 
@@ -35,7 +40,10 @@ namespace MailRuCloudApi
         public MailRuCloud(string login, string password, ITwoFaHandler twoFaHandler)
         {
             CloudApi = new CloudApi(login, password, twoFaHandler);
+            _pathResolver = new PathResolver(CloudApi);
         }
+
+
 
         /// <summary>
         /// Get list of files and folders from account.
@@ -44,8 +52,36 @@ namespace MailRuCloudApi
         /// <returns>List of the items.</returns>
         public virtual async Task<Entry> GetItems(string path)
         {
-            var data = await new FolderInfoRequest(CloudApi, path).MakeRequestAsync();
+            string ulink = _pathResolver.AsRelationalWebLink(path);
+            //path = string.IsNullOrEmpty(ulink) ? path : ulink;
+
+            var data = await new FolderInfoRequest(CloudApi, string.IsNullOrEmpty(ulink) ? path : ulink, !string.IsNullOrEmpty(ulink)).MakeRequestAsync();
+
+            if (!string.IsNullOrEmpty(ulink))
+            {
+                bool isFile = data.body.list.Any(it => it.weblink.TrimStart('/') == ulink.TrimStart('/'));
+
+                if (isFile) path = WebDavPath.Parent(path);
+
+                foreach (var propse in data.body.list)
+                {
+                    propse.home = WebDavPath.Combine(path, propse.name);
+                }
+                data.body.home = path;
+            }
+
             var entry = data.ToEntry();
+
+
+            var flinks = _pathResolver.GetItems(entry.FullPath);
+            if (flinks.Any())
+            {
+                foreach (var flink in flinks)
+                {
+                    entry.Folders.Add(new Folder(0, 0, 0, WebDavPath.Combine(entry.FullPath, flink.Name)));
+                }
+            }
+
             return entry;
         }
 
@@ -384,5 +420,12 @@ namespace MailRuCloudApi
         }
         #endregion
 
+        public void LinkFolder(string url, string path, string name)
+        {
+
+            _pathResolver.Add(url, path, name);
+        }
     }
+
+
 }

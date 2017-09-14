@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using System.Threading.Tasks;
+using MailRuCloudApi.Api.Requests;
 
 namespace MailRuCloudApi.Api
 {
@@ -25,7 +26,9 @@ namespace MailRuCloudApi.Api
             var globalLength = files.Sum(f => f.Size);
 
             _cloud = cloud;
-            _shard = _cloud.GetShardInfo(ShardType.Get).Result;
+            _shard = files.All(f => string.IsNullOrEmpty(f.PublicLink))
+                ? _cloud.GetShardInfo(ShardType.Get).Result
+                : _cloud.GetShardInfo(ShardType.WeblinkGet).Result;
 
             _files = files;
             _start = start;
@@ -83,7 +86,22 @@ namespace MailRuCloudApi.Api
                     {
                         try
                         {
-                            var request = (HttpWebRequest)WebRequest.Create($"{_shard.Url}{Uri.EscapeDataString(file.FullPath)}");
+                            //TODO : continue here
+
+
+                            //TODO: refact
+                            string downloadkey = string.Empty;
+                            if (_shard.Type == ShardType.WeblinkGet)
+                            {
+                                var dtres = new DownloadTokenRequest(_cloud).MakeRequestAsync().Result;
+                                downloadkey = dtres.body.token;
+                            }
+
+                            var request = _shard.Type == ShardType.Get
+                                ? (HttpWebRequest) WebRequest.Create($"{_shard.Url}{Uri.EscapeDataString(file.FullPath)}")
+                                : (HttpWebRequest)WebRequest.Create($"{_shard.Url}{new Uri(file.PublicLink).PathAndQuery.Remove(0, "/public".Length)}?key={downloadkey}");
+
+
                             request.Headers.Add("Accept-Ranges", "bytes");
                             request.AddRange(instart, inend);
                             request.Proxy = _cloud.Account.Proxy;

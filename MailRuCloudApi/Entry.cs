@@ -57,5 +57,6 @@ namespace MailRuCloudApi
         public string FullPath { get; }
 
         public long Size { get; set; }
+        public string WebLink { get; set; }
     }
 }

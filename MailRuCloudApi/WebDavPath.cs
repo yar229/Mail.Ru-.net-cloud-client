@@ -17,7 +17,7 @@ namespace MailRuCloudApi
 
         public static string Clean(string path)
         {
-            return path.Replace("\\", "/");
+            return path.Replace("\\", "/").TrimEnd('/');
         }
 
         public static string Parent(string path)
@@ -25,7 +25,16 @@ namespace MailRuCloudApi
             int pos = path.LastIndexOf("/", StringComparison.Ordinal);
             return pos > 0
                 ? path.Substring(0, pos)
-                : path;
+                : "/";
+        }
+
+        public static string Name(string path)
+        {
+            path = path.TrimEnd('/');
+            int pos = path.LastIndexOf("/", StringComparison.Ordinal);
+
+            string res = path.Substring(pos+1);
+            return res;
         }
     }
 }

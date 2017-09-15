@@ -33,7 +33,7 @@ namespace MailRuCloudApi.SpecialCommands
 
         public override Task<StoreCollectionResult> Execute()
         {
-            var m = Regex.Match(_param, @"(?snx-)link \s+ (?<url>https://?cloud.mail.ru/public/\w*/\w*)/? \s* (?<name>.*) ");
+            var m = Regex.Match(_param, @"(?snx-)link \s+ (https://?cloud.mail.ru/public)?(?<url>/\w*/\w*)/? \s* (?<name>.*) ");
             if (m.Success)
             {
                 _cloud.LinkFolder(m.Groups["url"].Value, _path, m.Groups["name"].Value);

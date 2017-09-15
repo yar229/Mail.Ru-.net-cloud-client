@@ -78,9 +78,11 @@ namespace MailRuCloudApi
         {
             get
             {
-                int index = FullPath.LastIndexOf(Name, StringComparison.Ordinal);
-                string s = index >= 0 ? FullPath.Substring(0, index) : FullPath;
-                return s;
+                return WebDavPath.Parent(FullPath);
+
+                //int index = WebDavPath.Parent()//FullPath.LastIndexOf(Name, StringComparison.Ordinal);
+                //string s = index >= 0 ? FullPath.Substring(0, index) : FullPath;
+                //return s;
             }
         }
 

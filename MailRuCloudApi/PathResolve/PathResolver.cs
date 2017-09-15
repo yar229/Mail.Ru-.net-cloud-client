@@ -12,7 +12,7 @@ namespace MailRuCloudApi.PathResolve
 {
     public class PathResolver
     {
-        private const string LinkContainerName = "folder.links.wdmrc";
+        public static string LinkContainerName = "folder.links.wdmrc";
         private readonly CloudApi _api;
         private FolderList _folderList;
 
@@ -68,7 +68,36 @@ namespace MailRuCloudApi.PathResolve
             return z;
         }
 
-        
+        public FolderLink GetItem(string path)
+        {
+            var name = WebDavPath.Name(path);
+            var pa = WebDavPath.Parent(path);
+
+            var z = _folderList.Folders
+                .FirstOrDefault(f => f.MapTo == pa && f.Name == name);
+
+            return z;
+        }
+
+        public void RemoveItem(string path)
+        {
+            var name = WebDavPath.Name(path);
+            var pa = WebDavPath.Parent(path);
+
+            var z = _folderList.Folders
+                .FirstOrDefault(f => f.MapTo == pa && f.Name == name);
+
+            if (z != null)
+            {
+                _folderList.Folders.Remove(z);
+                Save();
+            }
+
+
+        }
+
+
+
 
         public string AsWebLink(string path)
         {

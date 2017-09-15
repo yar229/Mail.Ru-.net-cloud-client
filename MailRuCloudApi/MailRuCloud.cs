@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -351,10 +352,18 @@ namespace MailRuCloudApi
         {
             var stream = new SplittedUploadStream(destinationPath, CloudApi, size);
 
+            // refresh linked folders
+            stream.FileUploaded += files =>
+            {
+                var file = files?.FirstOrDefault();
+                if (null == file) return;
+
+                if (file.Path == "/" && file.Name == PathResolver.LinkContainerName)
+                    _pathResolver.Load();
+            };
+
             return stream;
         }
-
-
 
         /// <summary>
         /// Rename item on server.
@@ -393,6 +402,19 @@ namespace MailRuCloudApi
         /// <returns>True or false result operation.</returns>
         private async Task<bool> Remove(string fullPath)
         {
+            //TODO: refact
+            string link = _pathResolver.AsRelationalWebLink(fullPath);
+
+            if (!string.IsNullOrEmpty(link))
+            {
+                //if folder is linked - do not delete inner files/folders if client deleting recursively
+                //just try to unlink folder
+                _pathResolver.RemoveItem(fullPath);
+
+                return true;
+            }
+
+
             await new RemoveRequest(CloudApi, fullPath)
                 .MakeRequestAsync();
 
@@ -427,5 +449,5 @@ namespace MailRuCloudApi
         }
     }
 
-
+    public delegate void FileUploadedDelegate(IEnumerable<File> file);
 }

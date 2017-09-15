@@ -117,6 +117,14 @@ namespace MailRuCloudApi.Api
             _uploadStream.Write(nbuffer, offset, (int)ncount);
         }
 
+        public event FileUploadedDelegate FileUploaded;
+
+        private void OnFileUploaded(IEnumerable<File> files)
+        {
+            var e = FileUploaded;
+            e?.Invoke(files);
+        }
+
         public override void Close()
         {
             if (_files.Count > 1)
@@ -133,6 +141,8 @@ namespace MailRuCloudApi.Api
             //    .MakeRequestAsync().Result;
 
             _uploadStream?.Close();
+
+            OnFileUploaded(_files);
         }
 
 

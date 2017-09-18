@@ -28,7 +28,7 @@ namespace MailRuCloudApi.PathResolve
 
         public void Save()
         {
-            string content = JsonConvert.SerializeObject(_folderList);
+            string content = JsonConvert.SerializeObject(_folderList, Formatting.Indented);
             var data = Encoding.UTF8.GetBytes(content);
             var stream = new UploadStream("/" + LinkContainerName, _api, data.Length);
             stream.Write(data, 0, data.Length);

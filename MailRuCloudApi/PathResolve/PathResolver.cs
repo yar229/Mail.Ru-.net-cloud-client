@@ -12,9 +12,9 @@ namespace MailRuCloudApi.PathResolve
 {
     public class PathResolver
     {
-        public static string LinkContainerName = "folder.links.wdmrc";
+        public static string LinkContainerName = "item.links.wdmrc";
         private readonly CloudApi _api;
-        private ItemList _folderList;
+        private ItemList _itemList;
 
 
         public PathResolver(CloudApi api)
@@ -28,7 +28,7 @@ namespace MailRuCloudApi.PathResolve
 
         public void Save()
         {
-            string content = JsonConvert.SerializeObject(_folderList, Formatting.Indented);
+            string content = JsonConvert.SerializeObject(_itemList, Formatting.Indented);
             var data = Encoding.UTF8.GetBytes(content);
             var stream = new UploadStream("/" + LinkContainerName, _api, data.Length);
             stream.Write(data, 0, data.Length);
@@ -37,24 +37,23 @@ namespace MailRuCloudApi.PathResolve
 
         public void Load()
         {
-            var flist = new FolderInfoRequest(_api, "/").MakeRequestAsync().Result.ToEntry();
+            var flist = new FolderInfoRequest(_api, WebDavPath.Root).MakeRequestAsync().Result.ToEntry();
             var file = flist.Files.FirstOrDefault(f => f.Name == LinkContainerName);
             if (file != null && file.Size > 3) //some clients put one/two/three-byte file before original file
             {
-                DownloadStream stream = new DownloadStream(new List<File> {file}, _api, null, null);
+                DownloadStream stream = new DownloadStream(file, _api);
 
                 using (StreamReader reader = new StreamReader(stream))
                 using (JsonTextReader jsonReader = new JsonTextReader(reader))
                 {
                     var ser = new JsonSerializer();
-
-                    _folderList = ser.Deserialize<ItemList>(jsonReader);
+                    _itemList = ser.Deserialize<ItemList>(jsonReader);
                 }
             }
 
-            if (null == _folderList) _folderList = new ItemList();
+            if (null == _itemList) _itemList = new ItemList();
 
-            foreach (var f in _folderList.Items)
+            foreach (var f in _itemList.Items)
             {
                 f.MapTo = WebDavPath.Clean(f.MapTo);
             }
@@ -62,7 +61,7 @@ namespace MailRuCloudApi.PathResolve
 
         public List<ItemLink> GetItems(string path)
         {
-            var z = _folderList.Items
+            var z = _itemList.Items
                 .Where(f => f.MapTo == path)
                 .ToList();
 
@@ -74,10 +73,10 @@ namespace MailRuCloudApi.PathResolve
             var name = WebDavPath.Name(path);
             var pa = WebDavPath.Parent(path);
 
-            var z = _folderList.Items
+            var item = _itemList.Items
                 .FirstOrDefault(f => f.MapTo == pa && f.Name == name);
 
-            return z;
+            return item;
         }
 
         public void RemoveItem(string path)
@@ -85,20 +84,17 @@ namespace MailRuCloudApi.PathResolve
             var name = WebDavPath.Name(path);
             var pa = WebDavPath.Parent(path);
 
-            var z = _folderList.Items
+            var z = _itemList.Items
                 .FirstOrDefault(f => f.MapTo == pa && f.Name == name);
 
             if (z != null)
             {
-                _folderList.Items.Remove(z);
+                _itemList.Items.Remove(z);
                 Save();
             }
 
 
         }
-
-
-
 
         public string AsWebLink(string path)
         {
@@ -110,10 +106,9 @@ namespace MailRuCloudApi.PathResolve
             {
                 string name = WebDavPath.Name(parent);
                 parent = WebDavPath.Parent(parent);
-                wp = _folderList.Items.FirstOrDefault(ip => parent == ip.MapTo && name == ip.Name)?.Href;
+                wp = _itemList.Items.FirstOrDefault(ip => parent == ip.MapTo && name == ip.Name)?.Href;
                 if (string.IsNullOrEmpty(wp)) right = WebDavPath.Combine(name, right);
-            } while (parent != "/" && string.IsNullOrEmpty(wp));
-            
+            } while (parent != WebDavPath.Root  && string.IsNullOrEmpty(wp));
             
             return string.IsNullOrEmpty(wp)
                 ? string.Empty
@@ -121,31 +116,22 @@ namespace MailRuCloudApi.PathResolve
         }
 
 
-        private const string PublicBaseLink = "https://cloud.mail.ru/public";
-        private const string PublicBaseLink1 = "https:/cloud.mail.ru/public";
+
         public string AsRelationalWebLink(string path)
         {
             //TODO: subject to refact
             string link = AsWebLink(path);
-            if (!string.IsNullOrEmpty(link))
-            {
-                if (link.StartsWith(PublicBaseLink))
-                {
-                    return link.Substring(PublicBaseLink.Length - 1);
-                }
-                return link;
-            }
-            return String.Empty;
+            link = GetRelaLink(link);
 
+            return link;
         }
 
         public void Add(string url, string path, string name, bool isFile, long size, DateTime? creationDate)
         {
             Load();
 
-            if (url.StartsWith(PublicBaseLink)) url = url.Remove(PublicBaseLink.Length);
-            if (url.StartsWith(PublicBaseLink1)) url = url.Remove(PublicBaseLink1.Length);
-            _folderList.Items.Add(new ItemLink
+            url = GetRelaLink(url);
+            _itemList.Items.Add(new ItemLink
             {
                 Href = url,
                 MapTo = WebDavPath.Clean(path),
@@ -155,6 +141,19 @@ namespace MailRuCloudApi.PathResolve
                 CreationDate = creationDate
             });
             Save();
+        }
+
+
+
+
+        private const string PublicBaseLink = "https://cloud.mail.ru/public";
+        private const string PublicBaseLink1 = "https:/cloud.mail.ru/public";
+
+        private string GetRelaLink(string url)
+        {
+            if (url.StartsWith(PublicBaseLink)) return url.Remove(PublicBaseLink.Length);
+            if (url.StartsWith(PublicBaseLink1)) return url.Remove(PublicBaseLink1.Length);
+            return url;
         }
     }
 }

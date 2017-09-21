@@ -36,5 +36,7 @@ namespace MailRuCloudApi
             string res = path.Substring(pos+1);
             return res;
         }
+
+        public static string Root => "/";
     }
 }

@@ -62,7 +62,7 @@
     <Compile Include="File.cs" />
     <Compile Include="FileSize.cs" />
     <Compile Include="Folder.cs" />
-    <Compile Include="PathResolve\FolderList.cs" />
+    <Compile Include="PathResolve\ItemList.cs" />
     <Compile Include="MailRuCloud.cs" />
     <Compile Include="Api\CloudApi.cs" />
     <Compile Include="Api\Requests\AccountInfoRequest.cs" />

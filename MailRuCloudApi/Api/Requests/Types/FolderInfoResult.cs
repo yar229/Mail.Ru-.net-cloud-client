@@ -8,28 +8,28 @@ namespace MailRuCloudApi.Api.Requests.Types
     public class FolderInfoResult
     {
         public string email { get; set; }
-        public Body body { get; set; }
+        public FolderInfoBody body { get; set; }
         public long time { get; set; }
         public int status { get; set; }
     }
 
 
-    public class Count
+    public class FolderInfoCount
     {
         public int folders { get; set; }
         public int files { get; set; }
     }
 
-    public class Sort
+    public class FolderInfoSort
     {
         public string order { get; set; }
         public string type { get; set; }
     }
 
-    public class Props
+    public class FolderInfoProps
     {
         public long mtime;
-        public Count count { get; set; }
+        public FolderInfoCount count { get; set; }
         public string tree { get; set; }
         public string name { get; set; }
         public int grev { get; set; }
@@ -43,19 +43,19 @@ namespace MailRuCloudApi.Api.Requests.Types
 
     }
 
-    public class Body
+    public class FolderInfoBody
     {
-        public Count count { get; set; }
+        public FolderInfoCount count { get; set; }
         public string tree { get; set; }
         public string name { get; set; }
         public int grev { get; set; }
         public long size { get; set; }
-        public Sort sort { get; set; }
+        public FolderInfoSort sort { get; set; }
         public string kind { get; set; }
         public int rev { get; set; }
         public string type { get; set; }
         public string home { get; set; }
-        public List<Props> list { get; set; }
+        public List<FolderInfoProps> list { get; set; }
     }
 
 }

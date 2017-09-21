@@ -74,17 +74,7 @@ namespace MailRuCloudApi
             }
         }
 
-        public string Path
-        {
-            get
-            {
-                return WebDavPath.Parent(FullPath);
-
-                //int index = WebDavPath.Parent()//FullPath.LastIndexOf(Name, StringComparison.Ordinal);
-                //string s = index >= 0 ? FullPath.Substring(0, index) : FullPath;
-                //return s;
-            }
-        }
+        public string Path => WebDavPath.Parent(FullPath);
 
         /// <summary>
         /// Gets public file link.

@@ -21,20 +21,14 @@ namespace MailRuCloudApi.Api
 
         private RingBufferedStream _innerStream;
 
-        public DownloadStream(IList<File> files, CloudApi cloud, long? start, long? end)
+        public DownloadStream(File file, CloudApi cloud, long? start = null, long? end = null)
+            : this(file.Files, cloud, start, end)
+        {
+        }
+
+        public DownloadStream(IList<File> files, CloudApi cloud, long? start = null, long? end = null)
         {
             var globalLength = files.Sum(f => f.Size);
-
-            ////TODO: refact
-            //// refresh linked files size
-            //if (!string.IsNullOrEmpty(files[0].PublicLink))
-            //{
-            //    var z = new ItemInfoRequest(cloud, files[0].PublicLink, true)
-            //        .MakeRequestAsync()
-            //        .Result;
-            //    globalLength = z.body.size;
-            //}
-
 
             _cloud = cloud;
             _shard = files.All(f => string.IsNullOrEmpty(f.PublicLink))
@@ -64,7 +58,7 @@ namespace MailRuCloudApi.Api
 
         private async Task<object> GetFileStream()
         {
-            var totalLength = Length; //_files.Sum(f => f.Size.DefaultValue);
+            var totalLength = Length;
             long glostart = _start ?? 0;
             long gloend = _end == null || (_start == _end && _end == 0) ? totalLength : _end.Value + 1;
 
@@ -86,7 +80,7 @@ namespace MailRuCloudApi.Api
                 }
                 
                 var instart = Math.Max(0, glostart - fileStart);
-                var inend = gloend - fileStart - 1; //Math.Min(clofile.Size.DefaultValue, gloend - fileStart);
+                var inend = gloend - fileStart - 1;
 
                 task = task.ContinueWith(task1 =>
                 {
@@ -97,9 +91,6 @@ namespace MailRuCloudApi.Api
                     {
                         try
                         {
-                            //TODO : continue here
-
-
                             //TODO: refact
                             string downloadkey = string.Empty;
                             if (_shard.Type == ShardType.WeblinkGet)

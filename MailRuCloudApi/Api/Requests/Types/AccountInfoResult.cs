@@ -58,7 +58,7 @@ namespace MailRuCloudApi.Api.Requests.Types
     public class Ui
     {
         public bool sidebar { get; set; }
-        public Sort sort { get; set; }
+        public FolderInfoSort sort { get; set; }
         public string kind { get; set; }
         public bool thumbs { get; set; }
         public bool expand_loader { get; set; }

@@ -54,7 +54,6 @@ namespace MailRuCloudApi
         public virtual async Task<Entry> GetItems(string path)
         {
             string ulink = _pathResolver.AsRelationalWebLink(path);
-            //path = string.IsNullOrEmpty(ulink) ? path : ulink;
 
             var data = await new FolderInfoRequest(CloudApi, string.IsNullOrEmpty(ulink) ? path : ulink, !string.IsNullOrEmpty(ulink)).MakeRequestAsync();
 

@@ -14,7 +14,7 @@ namespace MailRuCloudApi.PathResolve
     {
         public static string LinkContainerName = "folder.links.wdmrc";
         private readonly CloudApi _api;
-        private FolderList _folderList;
+        private ItemList _folderList;
 
 
         public PathResolver(CloudApi api)
@@ -39,41 +39,42 @@ namespace MailRuCloudApi.PathResolve
         {
             var flist = new FolderInfoRequest(_api, "/").MakeRequestAsync().Result.ToEntry();
             var file = flist.Files.FirstOrDefault(f => f.Name == LinkContainerName);
-            if (file != null)
+            if (file != null && file.Size > 3) //some clients put one/two/three-byte file before original file
             {
-                DownloadStream stream = new DownloadStream(new List<File>() {file}, _api, null, null);
+                DownloadStream stream = new DownloadStream(new List<File> {file}, _api, null, null);
 
                 using (StreamReader reader = new StreamReader(stream))
                 using (JsonTextReader jsonReader = new JsonTextReader(reader))
                 {
                     var ser = new JsonSerializer();
-                    _folderList = ser.Deserialize<FolderList>(jsonReader);
+
+                    _folderList = ser.Deserialize<ItemList>(jsonReader);
                 }
             }
 
-            if (null == _folderList) _folderList = new FolderList();
+            if (null == _folderList) _folderList = new ItemList();
 
-            foreach (var f in _folderList.Folders)
+            foreach (var f in _folderList.Items)
             {
                 f.MapTo = WebDavPath.Clean(f.MapTo);
             }
         }
 
-        public List<FolderLink> GetItems(string path)
+        public List<ItemLink> GetItems(string path)
         {
-            var z = _folderList.Folders
+            var z = _folderList.Items
                 .Where(f => f.MapTo == path)
                 .ToList();
 
             return z;
         }
 
-        public FolderLink GetItem(string path)
+        public ItemLink GetItem(string path)
         {
             var name = WebDavPath.Name(path);
             var pa = WebDavPath.Parent(path);
 
-            var z = _folderList.Folders
+            var z = _folderList.Items
                 .FirstOrDefault(f => f.MapTo == pa && f.Name == name);
 
             return z;
@@ -84,12 +85,12 @@ namespace MailRuCloudApi.PathResolve
             var name = WebDavPath.Name(path);
             var pa = WebDavPath.Parent(path);
 
-            var z = _folderList.Folders
+            var z = _folderList.Items
                 .FirstOrDefault(f => f.MapTo == pa && f.Name == name);
 
             if (z != null)
             {
-                _folderList.Folders.Remove(z);
+                _folderList.Items.Remove(z);
                 Save();
             }
 
@@ -109,7 +110,7 @@ namespace MailRuCloudApi.PathResolve
             {
                 string name = WebDavPath.Name(parent);
                 parent = WebDavPath.Parent(parent);
-                wp = _folderList.Folders.FirstOrDefault(ip => parent == ip.MapTo && name == ip.Name)?.Href;
+                wp = _folderList.Items.FirstOrDefault(ip => parent == ip.MapTo && name == ip.Name)?.Href;
                 if (string.IsNullOrEmpty(wp)) right = WebDavPath.Combine(name, right);
             } while (parent != "/" && string.IsNullOrEmpty(wp));
             
@@ -138,17 +139,20 @@ namespace MailRuCloudApi.PathResolve
 
         }
 
-        public void Add(string url, string path, string name)
+        public void Add(string url, string path, string name, bool isFile, long size, DateTime? creationDate)
         {
             Load();
 
             if (url.StartsWith(PublicBaseLink)) url = url.Remove(PublicBaseLink.Length);
             if (url.StartsWith(PublicBaseLink1)) url = url.Remove(PublicBaseLink1.Length);
-            _folderList.Folders.Add(new FolderLink
+            _folderList.Items.Add(new ItemLink
             {
                 Href = url,
                 MapTo = WebDavPath.Clean(path),
-                Name = name
+                Name = name,
+                IsFile = isFile,
+                Size = size,
+                CreationDate = creationDate
             });
             Save();
         }

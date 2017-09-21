@@ -46,6 +46,9 @@
     <Compile Include="Api\Account.cs" />
     <Compile Include="Api\ConstSettings.cs" />
     <Compile Include="Api\DownloadStream.cs" />
+    <Compile Include="Api\Requests\DownloadTokenRequest.cs" />
+    <Compile Include="Api\Requests\ItemInfoRequest.cs" />
+    <Compile Include="Api\Requests\Types\DownloadTokenResult.cs" />
     <Compile Include="Api\Requests\LoginRequest.cs" />
     <Compile Include="Api\Requests\Types\LoginResult.cs" />
     <Compile Include="Api\Requests\SecondStepAuthRequest.cs" />

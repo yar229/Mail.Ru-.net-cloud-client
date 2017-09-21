@@ -5,6 +5,8 @@
 // <author>Korolev Erast.</author>
 //-----------------------------------------------------------------------
 
+using System;
+
 namespace MailRuCloudApi
 {
     using System.Collections.Generic;
@@ -22,10 +24,11 @@ namespace MailRuCloudApi
         /// <param name="path">The entry path on the server.</param>
         public Entry(IList<Folder> folders, IList<File> files, string path)
         {
-            NumberOfFolders = folders.Count;
-            NumberOfFiles = files.Count;
-            Folders = folders;
-            Files = files;
+            Folders = folders ?? new List<Folder>();
+            Files = files ?? new List<File>();
+
+            NumberOfFolders = folders?.Count ?? 0;
+            NumberOfFiles = files?.Count ?? 0;
             FullPath = path;
         }
 
@@ -58,5 +61,8 @@ namespace MailRuCloudApi
 
         public long Size { get; set; }
         public string WebLink { get; set; }
+        public bool IsFile { get; set; }
+        public string Name { get; set; }
+        public DateTime? CreationDate { get; set; }
     }
 }

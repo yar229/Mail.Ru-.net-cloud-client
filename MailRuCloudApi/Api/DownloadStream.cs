@@ -25,6 +25,17 @@ namespace MailRuCloudApi.Api
         {
             var globalLength = files.Sum(f => f.Size);
 
+            ////TODO: refact
+            //// refresh linked files size
+            //if (!string.IsNullOrEmpty(files[0].PublicLink))
+            //{
+            //    var z = new ItemInfoRequest(cloud, files[0].PublicLink, true)
+            //        .MakeRequestAsync()
+            //        .Result;
+            //    globalLength = z.body.size;
+            //}
+
+
             _cloud = cloud;
             _shard = files.All(f => string.IsNullOrEmpty(f.PublicLink))
                 ? _cloud.GetShardInfo(ShardType.Get).Result
@@ -93,8 +104,9 @@ namespace MailRuCloudApi.Api
                             string downloadkey = string.Empty;
                             if (_shard.Type == ShardType.WeblinkGet)
                             {
-                                var dtres = new DownloadTokenRequest(_cloud).MakeRequestAsync().Result;
-                                downloadkey = dtres.body.token;
+                                //var dtres = new DownloadTokenHtmlRequest(_cloud, file.PublicLink).MakeRequestAsync().Result;
+                                //downloadkey = dtres.body.token;
+                                downloadkey = _cloud.DownloadToken;
                             }
 
                             var request = _shard.Type == ShardType.Get

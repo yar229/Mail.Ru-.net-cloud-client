@@ -84,11 +84,11 @@ namespace MailRuCloudApi.Extensions
         public static Entry ToEntry(this FolderInfoResult data)
         {
             var entry = new Entry(
-                    data.body.list
+                    data.body.list?
                         .Where(it => FolderKinds.Contains(it.kind))
                         .Select(it => new Folder(it.count.folders, it.count.files, it.size, it.home, string.IsNullOrEmpty(it.weblink) ? "" : ConstSettings.PublishFileLink + it.weblink))
                         .ToList(),
-                    data.body.list
+                    data.body.list?
                         .Where(it => it.kind == "file")
                         .Select(it => new File(it.home, it.size, it.hash)
                         {
@@ -101,10 +101,14 @@ namespace MailRuCloudApi.Extensions
                         }).ToList(),
                     data.body.home)
             {
+                CreationDate = DateTime.Now,
+                Name = data.body.name,
+                IsFile = data.body.kind == "file",
                 Size = data.body.size,
-                WebLink = (data.body?.list != null && data.body.list.Count > 0)
-                    ? data.body.list[0].weblink
-                    : string.Empty
+                //WebLink = data.body.
+                //WebLink = (data.body?.list != null && data.body.list.Count > 0)
+                //    ? data.body.list[0].weblink
+                //    : string.Empty
             };
 
             return entry;

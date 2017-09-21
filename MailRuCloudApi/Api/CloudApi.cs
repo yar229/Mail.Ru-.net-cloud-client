@@ -22,6 +22,23 @@ namespace MailRuCloudApi.Api
         /// <value>Account info.</value>
         public Account Account { get; set; }
 
+        //public string DownloadToken { get; set; }
+
+
+        public string DownloadToken
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_downloadToken))
+                {
+                    var dtres = new DownloadTokenRequest(this).MakeRequestAsync().Result;
+                    _downloadToken = dtres.body.token;
+                }
+                return _downloadToken;
+            }
+        }
+        private string _downloadToken;
+
 
         public CloudApi(string login, string password, ITwoFaHandler twoFaHandler)
         {

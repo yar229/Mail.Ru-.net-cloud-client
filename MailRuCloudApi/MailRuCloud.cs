@@ -62,13 +62,14 @@ namespace MailRuCloudApi
             {
                 bool isFile = data.body.list.Any(it => it.weblink.TrimStart('/') == ulink.TrimStart('/'));
 
-                if (isFile) path = WebDavPath.Parent(path);
+                string trimpath = path;
+                if (isFile) trimpath = WebDavPath.Parent(path);
 
                 foreach (var propse in data.body.list)
                 {
-                    propse.home = WebDavPath.Combine(path, propse.name);
+                    propse.home = WebDavPath.Combine(trimpath, propse.name);
                 }
-                data.body.home = path;
+                data.body.home = trimpath;
             }
 
             var entry = data.ToEntry();
@@ -79,7 +80,15 @@ namespace MailRuCloudApi
             {
                 foreach (var flink in flinks)
                 {
-                    entry.Folders.Add(new Folder(0, 0, 0, WebDavPath.Combine(entry.FullPath, flink.Name)));
+                    string linkpath = WebDavPath.Combine(entry.FullPath, flink.Name);
+
+                    if (!flink.IsFile)
+                        entry.Folders.Add(new Folder(0, 0, 0, linkpath) { CreationTimeUtc = flink.CreationDate ?? DateTime.MinValue });
+                    else
+                    {
+                        if (entry.Files.All(inf => inf.FullPath != linkpath))
+                            entry.Files.Add(new File(linkpath, flink.Size, string.Empty));
+                    }
                 }
             }
 
@@ -342,7 +351,9 @@ namespace MailRuCloudApi
 
         public async Task<Stream> GetFileDownloadStream(File file, long? start, long? end)
         {
-            var task = Task.FromResult(new DownloadStream(file.Files, CloudApi, start, end));
+            var filelst = file.Files.Count == 0 ? new List<File>{file} : file.Files;
+
+            var task = Task.FromResult(new DownloadStream(filelst, CloudApi, start, end));
             Stream stream = await task;
             return stream;
         }
@@ -442,10 +453,9 @@ namespace MailRuCloudApi
         }
         #endregion
 
-        public void LinkFolder(string url, string path, string name)
+        public void LinkItem(string url, string path, string name, bool isFile, long size, DateTime? creationDate)
         {
-
-            _pathResolver.Add(url, path, name);
+            _pathResolver.Add(url, path, name, isFile, size, creationDate);
         }
     }
 

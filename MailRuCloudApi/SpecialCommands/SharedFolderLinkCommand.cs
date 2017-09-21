@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using MailRuCloudApi.Api.Requests;
+using MailRuCloudApi.Extensions;
 using NWebDav.Server;
 using NWebDav.Server.Stores;
 
@@ -22,7 +24,7 @@ namespace MailRuCloudApi.SpecialCommands
         {
             get
             {
-                var m = Regex.Match(_param, @"(?snx-) /? >> (https://?cloud.mail.ru/public)?(?<data>/\w*/\w*)/?\s*");
+                var m = Regex.Match(_param, @"(?snx-) /? >> (https://?cloud.mail.ru/public)?(?<data>/\w*/?\w*)/?\s*");
 
                 return m.Success
                     ? m.Groups["data"].Value
@@ -34,9 +36,19 @@ namespace MailRuCloudApi.SpecialCommands
         public override Task<StoreCollectionResult> Execute()
         {
             var m = Regex.Match(_param, @"(?snx-)link \s+ (https://?cloud.mail.ru/public)?(?<url>/\w*/\w*)/? \s* (?<name>.*) ");
+
+            var info = new ItemInfoRequest(_cloud.CloudApi, m.Groups["url"].Value, true).MakeRequestAsync().Result.ToEntry();
+
+            bool isFile = info.IsFile;
+            long size = info.Size;
+
+
+            string name = m.Groups["name"].Value;
+            if (string.IsNullOrWhiteSpace(name)) name = info.Name;
+
             if (m.Success)
             {
-                _cloud.LinkFolder(m.Groups["url"].Value, _path, m.Groups["name"].Value);
+                _cloud.LinkItem(m.Groups["url"].Value, _path, name, isFile, size, info.CreationDate);
             }
 
             return Task.FromResult(new StoreCollectionResult(DavStatusCode.Created));

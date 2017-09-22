@@ -130,17 +130,22 @@ namespace MailRuCloudApi.PathResolve
         {
             Load();
 
+            path = WebDavPath.Clean(path);
             url = GetRelaLink(url);
-            _itemList.Items.Add(new ItemLink
+
+            if (!_itemList.Items.Any(ii => ii.Href == url && ii.MapTo == path && ii.Name == name))
             {
-                Href = url,
-                MapTo = WebDavPath.Clean(path),
-                Name = name,
-                IsFile = isFile,
-                Size = size,
-                CreationDate = creationDate
-            });
-            Save();
+                _itemList.Items.Add(new ItemLink
+                {
+                    Href = url,
+                    MapTo = WebDavPath.Clean(path),
+                    Name = name,
+                    IsFile = isFile,
+                    Size = size,
+                    CreationDate = creationDate
+                });
+                Save();
+            }
         }
 
 

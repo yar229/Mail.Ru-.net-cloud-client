@@ -133,7 +133,7 @@ namespace MailRuCloudApi.PathResolve
             path = WebDavPath.Clean(path);
             url = GetRelaLink(url);
 
-            if (!_itemList.Items.Any(ii => ii.Href == url && ii.MapTo == path && ii.Name == name))
+            if (!_itemList.Items.Any(ii => ii.MapTo == path && ii.Name == name))
             {
                 _itemList.Items.Add(new ItemLink
                 {

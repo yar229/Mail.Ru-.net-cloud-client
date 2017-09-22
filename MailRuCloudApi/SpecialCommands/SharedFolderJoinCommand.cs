@@ -23,7 +23,7 @@ namespace MailRuCloudApi.SpecialCommands
         {
             get
             {
-                var m = Regex.Match(_param, @"(?snx-) /? >> (https://?cloud.mail.ru/public)?(?<data>/\w*/\w*)/?\s*");
+                var m = Regex.Match(_param, @"(?snx-) (https://?cloud.mail.ru/public)?(?<data>/\w*/?\w*)/?\s*");
 
                 return m.Success
                     ? m.Groups["data"].Value

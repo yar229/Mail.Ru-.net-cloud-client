@@ -16,12 +16,6 @@ namespace MailRuCloudApi.SpecialCommands
             if (data.StartsWith("link ")) return new SharedFolderLinkCommand(cloud, path, data);
 
             return new SharedFolderJoinCommand(cloud, path, data);
-
-            //return null;
-
-            //return param != null && param.Contains("/>>")
-            //    ? new SharedFolderJoinCommand(cloud, path, param)
-            //    : null;
         }
     }
 }

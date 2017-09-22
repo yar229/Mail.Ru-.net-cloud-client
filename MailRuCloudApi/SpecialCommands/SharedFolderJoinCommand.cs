@@ -31,17 +31,6 @@ namespace MailRuCloudApi.SpecialCommands
             }
         }
 
-        //private string Path
-        //{
-        //    get
-        //    {
-        //        int pos = _param.LastIndexOf("/>>", StringComparison.Ordinal);
-        //        return pos > 0
-        //            ? _param.Substring(0, pos)
-        //            : "/";
-        //    }
-        //}
-
         public override Task<StoreCollectionResult> Execute()
         {
             bool k = _cloud.CloneItem(_path, Value).Result;

@@ -17,7 +17,10 @@ namespace MailRuCloudApi
 
         public static string Clean(string path)
         {
-            return path.Replace("\\", "/").TrimEnd('/');
+            string res = path.Replace("\\", "/");
+            if (res.Length > 1)                
+                return res.TrimEnd('/');
+            return res;
         }
 
         public static string Parent(string path)

@@ -122,14 +122,31 @@ namespace MailRuCloudApi.Api
                 FileSizeLimit = new AccountInfoRequest(_cloudApi).MakeRequestAsync().Result.body.cloud.file_size_limit
             };
 
-            Expires = DateTime.Now.AddHours(23);
+            TokenExpiresAt = DateTime.Now.AddHours(TokenExpiresInSec);
 
             return true;
         }
 
+        public DateTime TokenExpiresAt { get; private set; }
+        private const int TokenExpiresInSec = 23 * 60 * 60;
 
 
-        public DateTime Expires { get; private set; }
+        public string DownloadToken
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_downloadToken) || (DateTime.Now - _downloadTokenDate).TotalSeconds > DownloadTokenExpiresSec)
+                {
+                    _downloadTokenDate = DateTime.Now;
+                    var dtres = new DownloadTokenRequest(_cloudApi).MakeRequestAsync().Result;
+                    _downloadToken = dtres.body.token;
+                }
+                return _downloadToken;
+            }
+        }
+        private string _downloadToken;
+        private DateTime _downloadTokenDate = DateTime.MinValue;
+        private const int DownloadTokenExpiresSec = 2 * 60 * 60;
 
         /// <summary>
         /// Need to add this function for all calls.

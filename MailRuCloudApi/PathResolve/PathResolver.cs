@@ -7,11 +7,14 @@ using MailRuCloudApi.Api;
 using MailRuCloudApi.Api.Requests;
 using MailRuCloudApi.Extensions;
 using Newtonsoft.Json;
+using NWebDav.Server.Logging;
 
 namespace MailRuCloudApi.PathResolve
 {
     public class PathResolver
     {
+        private static readonly ILogger Logger = LoggerFactory.Factory.CreateLogger(typeof(PathResolver));
+
         public static string LinkContainerName = "item.links.wdmrc";
         private readonly CloudApi _api;
         private ItemList _itemList;
@@ -28,15 +31,20 @@ namespace MailRuCloudApi.PathResolve
 
         public void Save()
         {
+            Logger.Log(LogLevel.Info, () => $"Saving links to {LinkContainerName}");
+
             string content = JsonConvert.SerializeObject(_itemList, Formatting.Indented);
             var data = Encoding.UTF8.GetBytes(content);
-            var stream = new UploadStream("/" + LinkContainerName, _api, data.Length);
-            stream.Write(data, 0, data.Length);
-            stream.Close();
+            using (var stream = new UploadStream("/" + LinkContainerName, _api, data.Length))
+            {
+                stream.Write(data, 0, data.Length);
+                stream.Close();
+            }
         }
 
         public void Load()
         {
+            Logger.Log(LogLevel.Info, () => $"Loading links from {LinkContainerName}");
             var flist = new FolderInfoRequest(_api, WebDavPath.Root).MakeRequestAsync().Result.ToEntry();
             var file = flist.Files.FirstOrDefault(f => f.Name == LinkContainerName);
             if (file != null && file.Size > 3) //some clients put one/two/three-byte file before original file

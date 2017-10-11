@@ -8,17 +8,18 @@ using MailRuCloudApi.Api.Requests;
 
 namespace MailRuCloudApi.Api
 {
+    //TODO: implement IOException.IsDiskFull()
     internal class UploadStream : Stream
     {
         private readonly CloudApi _cloud;
-        private readonly File _file;
+        private readonly EntryTypes.File _file;
         private readonly ShardInfo _shard;
 
         public UploadStream(string destinationPath, CloudApi cloud, long size)
         {
             _cloud = cloud;
 
-            _file = new File(destinationPath, size, null);
+            _file = new EntryTypes.File(destinationPath, size, null);
             _shard = _cloud.GetShardInfo(ShardType.Upload).Result;
 
             Initialize();
@@ -191,7 +192,7 @@ namespace MailRuCloudApi.Api
 
 
 
-        private async Task<bool> AddFileInCloud(File fileInfo, ResolveFileConflictMethod conflict = ResolveFileConflictMethod.Rewrite)
+        private async Task<bool> AddFileInCloud(EntryTypes.File fileInfo, ResolveFileConflictMethod conflict = ResolveFileConflictMethod.Rewrite)
         {
             await new CreateFileRequest(_cloud, fileInfo.FullPath, fileInfo.Hash, fileInfo.Size, conflict)
                 .MakeRequestAsync();

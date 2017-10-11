@@ -9,12 +9,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MailRuCloudApi
+namespace MailRuCloudApi.EntryTypes
 {
     /// <summary>
     /// Server file info.
     /// </summary>
-    public class File
+    public class File : IFileOrFolder
     {
         protected File()
         {
@@ -111,6 +111,7 @@ namespace MailRuCloudApi
                 }
         }
 
+        //TODO: wrong way...
         public void SetPath(string fullPath)
         {
             FullPath = WebDavPath.Combine(fullPath, Name);

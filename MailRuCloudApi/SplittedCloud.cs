@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using MailRuCloudApi.EntryTypes;
 
 namespace MailRuCloudApi
 {
@@ -10,22 +11,27 @@ namespace MailRuCloudApi
         {
         }
 
-        public override async Task<Entry> GetItems(string path)
+        public override async Task<IFileOrFolder> GetItems(string path)
         {
-            Entry entry = await base.GetItems(path);
+            var entry = await base.GetItems(path);
 
             if (null == entry) return null;
 
-            var groupedFiles = entry.Files
-                .GroupBy(f => Regex.Match(f.Name, @"(?<name>.*?)(\.wdmrc\.(crc|\d\d\d))?\Z").Groups["name"].Value, file => file)
-                .Select(group => group.Count() == 1
-                    ? group.First()
-                    : new SplittedFile(group.ToList()))
-                .ToList();
+            if (entry is Folder folder)
+            {
 
-            var newEntry = new Entry(entry.Folders, groupedFiles, entry.FullPath) {Size = entry.Size};
+                var groupedFiles = folder.Files
+                    .GroupBy(f => Regex.Match(f.Name, @"(?<name>.*?)(\.wdmrc\.(crc|\d\d\d))?\Z").Groups["name"].Value,
+                        file => file)
+                    .Select(group => group.Count() == 1
+                        ? group.First()
+                        : new SplittedFile(group.ToList()))
+                    .ToList();
 
-            return newEntry;
+                folder.Files = groupedFiles;
+            }
+
+            return entry;
         }
     }
 }

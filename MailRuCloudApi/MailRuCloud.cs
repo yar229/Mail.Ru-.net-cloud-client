@@ -12,8 +12,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api;
 using MailRuCloudApi.Api.Requests;
+using MailRuCloudApi.EntryTypes;
 using MailRuCloudApi.Extensions;
 using MailRuCloudApi.PathResolve;
+using File = MailRuCloudApi.EntryTypes.File;
 
 
 namespace MailRuCloudApi
@@ -51,42 +53,24 @@ namespace MailRuCloudApi
         /// </summary>
         /// <param name="path">Path in the cloud to return the list of the items.</param>
         /// <returns>List of the items.</returns>
-        public virtual async Task<Entry> GetItems(string path)
+        public virtual async Task<IFileOrFolder> GetItems(string path)
         {
             string ulink = _pathResolver.AsRelationalWebLink(path);
 
             var data = await new FolderInfoRequest(CloudApi, string.IsNullOrEmpty(ulink) ? path : ulink, !string.IsNullOrEmpty(ulink)).MakeRequestAsync();
+            var entry = data.ToEntry(path, ulink);
 
-            if (!string.IsNullOrEmpty(ulink))
+            if (entry is Folder folder)
             {
-                bool isFile = data.body.list.Any(it => it.weblink.TrimStart('/') == ulink.TrimStart('/'));
-
-                string trimpath = path;
-                if (isFile) trimpath = WebDavPath.Parent(path);
-
-                foreach (var propse in data.body.list)
+                var flinks = _pathResolver.GetItems(entry.FullPath);
+                if (flinks.Any())
                 {
-                    propse.home = WebDavPath.Combine(trimpath, propse.name);
-                }
-                data.body.home = trimpath;
-            }
-
-            var entry = data.ToEntry();
-
-
-            var flinks = _pathResolver.GetItems(entry.FullPath);
-            if (flinks.Any())
-            {
-                foreach (var flink in flinks)
-                {
-                    string linkpath = WebDavPath.Combine(entry.FullPath, flink.Name);
-
-                    if (!flink.IsFile)
-                        entry.Folders.Add(new Folder(0, 0, 0, linkpath) { CreationTimeUtc = flink.CreationDate ?? DateTime.MinValue });
-                    else
+                    foreach (var flink in flinks)
                     {
-                        if (entry.Files.All(inf => inf.FullPath != linkpath))
-                            entry.Files.Add(new File(linkpath, flink.Size, string.Empty));
+                        string linkpath = WebDavPath.Combine(entry.FullPath, flink.Name);
+
+                        var item = flink.ToEntry(linkpath);
+                        folder.AddChild(item);
                     }
                 }
             }
@@ -110,7 +94,7 @@ namespace MailRuCloudApi
         /// </summary>
         /// <param name="folder">Folder info.</param>
         /// <returns>List of the items.</returns>
-        public async Task<Entry> GetItems(Folder folder)
+        public async Task<IFileOrFolder> GetItems(Folder folder)
         {
             return await GetItems(folder.FullPath);
         }
@@ -124,16 +108,16 @@ namespace MailRuCloudApi
             CloudApi.CancelToken.Cancel(true);
         }
 
-        /// <summary>
-        /// Copying folder in another space on the server.
-        /// </summary>
-        /// <param name="folder">Folder info to copying.</param>
-        /// <param name="destinationEntry">Destination entry on the server.</param>
-        /// <returns>True or false operation result.</returns>
-        public async Task<bool> Copy(Folder folder, Entry destinationEntry)
-        {
-            return await Copy(folder, destinationEntry.FullPath);
-        }
+        ///// <summary>
+        ///// Copying folder in another space on the server.
+        ///// </summary>
+        ///// <param name="folder">Folder info to copying.</param>
+        ///// <param name="destinationEntry">Destination entry on the server.</param>
+        ///// <returns>True or false operation result.</returns>
+        //public async Task<bool> Copy(Folder folder, Entry destinationEntry)
+        //{
+        //    return await Copy(folder, destinationEntry.FullPath);
+        //}
 
         /// <summary>
         /// Copying folder in another space on the server.
@@ -157,16 +141,16 @@ namespace MailRuCloudApi
             return !string.IsNullOrEmpty(await MoveOrCopy(folder.FullPath, destinationPath, false));
         }
 
-        /// <summary>
-        /// Copying file in another space on the server.
-        /// </summary>
-        /// <param name="file">File info to copying.</param>
-        /// <param name="destinationEntry">Destination entry on the server.</param>
-        /// <returns>True or false operation result.</returns>
-        public async Task<bool> Copy(File file, Entry destinationEntry)
-        {
-            return await Copy(file, destinationEntry.FullPath);
-        }
+        ///// <summary>
+        ///// Copying file in another space on the server.
+        ///// </summary>
+        ///// <param name="file">File info to copying.</param>
+        ///// <param name="destinationEntry">Destination entry on the server.</param>
+        ///// <returns>True or false operation result.</returns>
+        //public async Task<bool> Copy(File file, Entry destinationEntry)
+        //{
+        //    return await Copy(file, destinationEntry.FullPath);
+        //}
 
         /// <summary>
         /// Copying file in another space on the server.
@@ -235,16 +219,16 @@ namespace MailRuCloudApi
             return await Move(folder, destinationFolder.FullPath);
         }
 
-        /// <summary>
-        /// Move folder in another space on the server.
-        /// </summary>
-        /// <param name="folder">Folder info to moving.</param>
-        /// <param name="destinationEntry">Destination entry on the server.</param>
-        /// <returns>True or false operation result.</returns>
-        public async Task<bool> Move(Folder folder, Entry destinationEntry)
-        {
-            return await Move(folder, destinationEntry.FullPath);
-        }
+        ///// <summary>
+        ///// Move folder in another space on the server.
+        ///// </summary>
+        ///// <param name="folder">Folder info to moving.</param>
+        ///// <param name="destinationEntry">Destination entry on the server.</param>
+        ///// <returns>True or false operation result.</returns>
+        //public async Task<bool> Move(Folder folder, Entry destinationEntry)
+        //{
+        //    return await Move(folder, destinationEntry.FullPath);
+        //}
 
         /// <summary>
         /// Move folder in another space on the server.
@@ -257,16 +241,16 @@ namespace MailRuCloudApi
             return !string.IsNullOrEmpty(await MoveOrCopy(folder.FullPath, destinationPath, true));
         }
 
-        /// <summary>
-        /// Move file in another space on the server.
-        /// </summary>
-        /// <param name="file">File info to move.</param>
-        /// <param name="destinationEntry">Destination entry on the server.</param>
-        /// <returns>True or false operation result.</returns>
-        public async Task<bool> Move(File file, Entry destinationEntry)
-        {
-            return await Move(file, destinationEntry.FullPath);
-        }
+        ///// <summary>
+        ///// Move file in another space on the server.
+        ///// </summary>
+        ///// <param name="file">File info to move.</param>
+        ///// <param name="destinationEntry">Destination entry on the server.</param>
+        ///// <returns>True or false operation result.</returns>
+        //public async Task<bool> Move(File file, Entry destinationEntry)
+        //{
+        //    return await Move(file, destinationEntry.FullPath);
+        //}
 
         /// <summary>
         /// Move file in another space on the server.

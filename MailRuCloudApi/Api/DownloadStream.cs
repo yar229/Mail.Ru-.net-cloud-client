@@ -13,7 +13,7 @@ namespace MailRuCloudApi.Api
     {
         private const int InnerBufferSize = 65536;
 
-        private readonly IList<File> _files;
+        private readonly IList<EntryTypes.File> _files;
         private readonly ShardInfo _shard;
         private readonly CloudApi _cloud;
         private readonly long? _start;
@@ -21,12 +21,12 @@ namespace MailRuCloudApi.Api
 
         private RingBufferedStream _innerStream;
 
-        public DownloadStream(File file, CloudApi cloud, long? start = null, long? end = null)
+        public DownloadStream(EntryTypes.File file, CloudApi cloud, long? start = null, long? end = null)
             : this(file.Files, cloud, start, end)
         {
         }
 
-        public DownloadStream(IList<File> files, CloudApi cloud, long? start = null, long? end = null)
+        public DownloadStream(IList<EntryTypes.File> files, CloudApi cloud, long? start = null, long? end = null)
         {
             var globalLength = files.Sum(f => f.Size);
 

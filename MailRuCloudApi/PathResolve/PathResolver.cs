@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using MailRuCloudApi.Api;
 using MailRuCloudApi.Api.Requests;
+using MailRuCloudApi.EntryTypes;
 using MailRuCloudApi.Extensions;
 using Newtonsoft.Json;
 using NWebDav.Server.Logging;
@@ -45,8 +46,8 @@ namespace MailRuCloudApi.PathResolve
         public void Load()
         {
             Logger.Log(LogLevel.Info, () => $"Loading links from {LinkContainerName}");
-            var flist = new FolderInfoRequest(_api, WebDavPath.Root).MakeRequestAsync().Result.ToEntry();
-            var file = flist.Files.FirstOrDefault(f => f.Name == LinkContainerName);
+            var flist = new FolderInfoRequest(_api, WebDavPath.Root).MakeRequestAsync().Result.ToEntry(WebDavPath.Root, string.Empty);
+            var file = (flist as Folder)?.Files.FirstOrDefault(f => f.Name == LinkContainerName);
             if (file != null && file.Size > 3) //some clients put one/two/three-byte file before original file
             {
                 DownloadStream stream = new DownloadStream(file, _api);

@@ -6,15 +6,20 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
-namespace MailRuCloudApi
+namespace MailRuCloudApi.EntryTypes
 {
     /// <summary>
     /// Server file info.
     /// </summary>
-    public class Folder
+    public class Folder : IFileOrFolder
     {
+        private IList<File> _files = new List<File>();
+        private IList<Folder> _folders = new List<Folder>();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Folder" /> class.
         /// </summary>
@@ -26,15 +31,14 @@ namespace MailRuCloudApi
         /// <summary>
         /// Initializes a new instance of the <see cref="Folder" /> class.
         /// </summary>
-        /// <param name="foldersCount">Number of folders.</param>
-        /// <param name="filesCount">Number of files.</param>
         /// <param name="size">Folder size.</param>
         /// <param name="fullPath">Full folder path.</param>
         /// <param name="publicLink">Public folder link.</param>
-        public Folder(int foldersCount, int filesCount, FileSize size, string fullPath, string publicLink = null):this(fullPath)
+        public Folder(FileSize size, string fullPath, string publicLink = null):this(fullPath)
         {
-            NumberOfFolders = foldersCount;
-            NumberOfFiles = filesCount;
+            Folders = new List<Folder>();
+            Files = new List<File>();
+
             Size = size;
             PublicLink = publicLink;
         }
@@ -43,13 +47,13 @@ namespace MailRuCloudApi
         /// Gets number of folders in folder.
         /// </summary>
         /// <value>Number of folders.</value>
-        public int NumberOfFolders { get; }
+        public int NumberOfFolders => Folders?.Count ?? 0;
 
         /// <summary>
         /// Gets number of files in folder.
         /// </summary>
         /// <value>Number of files.</value>
-        public int NumberOfFiles { get; }
+        public int NumberOfFiles => Files?.Count ?? 0;
 
         /// <summary>
         /// Gets folder name.
@@ -94,5 +98,38 @@ namespace MailRuCloudApi
 
 
         public FileAttributes Attributes { get; set; } = FileAttributes.Directory;
+
+
+        /// <summary>
+        /// Gets list of the folders with their specification.
+        /// </summary>
+        public IList<Folder> Folders
+        {
+            get { return _folders; }
+            set { _folders = value; }
+        }
+
+        /// <summary>
+        /// Gets list of the files with their specification.
+        /// </summary>
+        public IList<File> Files
+        {
+            get { return _files; }
+            set { _files = value; }
+        }
+
+        public void AddChild(IFileOrFolder item)
+        {
+            if (item is Folder f)
+            {
+                if (Folders.All(inf => inf.FullPath != item.FullPath))
+                    Folders.Add(f);
+            }
+            else
+            {
+                if (Files.All(inf => inf.FullPath != item.FullPath))
+                    Files.Add(item as File);;
+            }
+        }
     }
 }

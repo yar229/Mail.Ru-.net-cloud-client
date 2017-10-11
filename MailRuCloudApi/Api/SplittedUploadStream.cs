@@ -11,14 +11,14 @@ namespace MailRuCloudApi.Api
         private readonly CloudApi _cloud;
         private long _size;
         private readonly long _maxFileSize;
-        private File _origfile;
+        private EntryTypes.File _origfile;
 
         private int _currFileId = -1;
         private long _bytesWrote;
         private UploadStream _uploadStream;
 
 
-        private readonly List<File> _files = new List<File>();
+        private readonly List<EntryTypes.File> _files = new List<EntryTypes.File>();
 
         public SplittedUploadStream(string destinationPath, CloudApi cloud, long size)
         {
@@ -36,7 +36,7 @@ namespace MailRuCloudApi.Api
         private void Initialize()
         {
             long allowedSize = _maxFileSize; //TODO: make it right //- BytesCount(_file.Name);
-            _origfile = new File(_destinationPath, _size, null);
+            _origfile = new EntryTypes.File(_destinationPath, _size, null);
             if (_size <= allowedSize)
             {
                 _files.Add(_origfile);
@@ -48,7 +48,7 @@ namespace MailRuCloudApi.Api
                     throw new OverflowException("Cannot upload more than 999 file parts");
                 for (int i = 1; i <= nfiles; i++)
                 {
-                    var f = new File($"{_origfile.FullPath}.wdmrc.{i:D3}",
+                    var f = new EntryTypes.File($"{_origfile.FullPath}.wdmrc.{i:D3}",
                         i != nfiles ? allowedSize : _size % allowedSize,
                         null);
                     _files.Add(f);
@@ -119,7 +119,7 @@ namespace MailRuCloudApi.Api
 
         public event FileUploadedDelegate FileUploaded;
 
-        private void OnFileUploaded(IEnumerable<File> files)
+        private void OnFileUploaded(IEnumerable<EntryTypes.File> files)
         {
             var e = FileUploaded;
             e?.Invoke(files);

@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MailRuCloudApi.Api.Requests;
+using MailRuCloudApi.EntryTypes;
 using MailRuCloudApi.Extensions;
 using NWebDav.Server;
 using NWebDav.Server.Stores;
@@ -37,9 +38,9 @@ namespace MailRuCloudApi.SpecialCommands
         {
             var m = Regex.Match(_param, @"(?snx-)link \s+ (https://?cloud.mail.ru/public)?(?<url>/\w*/\w*)/? \s* (?<name>.*) ");
 
-            var info = new ItemInfoRequest(_cloud.CloudApi, m.Groups["url"].Value, true).MakeRequestAsync().Result.ToEntry();
+            var info = new ItemInfoRequest(_cloud.CloudApi, m.Groups["url"].Value, true).MakeRequestAsync().Result.ToEntry("", "");
 
-            bool isFile = info.IsFile;
+            bool isFile = info is File;
             long size = info.Size;
 
 
@@ -48,7 +49,7 @@ namespace MailRuCloudApi.SpecialCommands
 
             if (m.Success)
             {
-                _cloud.LinkItem(m.Groups["url"].Value, _path, name, isFile, size, info.CreationDate);
+                _cloud.LinkItem(m.Groups["url"].Value, _path, name, isFile, size, info.CreationTimeUtc);
             }
 
             return Task.FromResult(new StoreCollectionResult(DavStatusCode.Created));

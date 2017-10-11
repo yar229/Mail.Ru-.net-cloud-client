@@ -56,12 +56,12 @@
     <Compile Include="Api\UploadStream.cs" />
     <Compile Include="CarotCryptStream.cs" />
     <Compile Include="DiskUsage.cs" />
-    <Compile Include="Entry.cs" />
     <Compile Include="Extensions\DtoImport.cs" />
     <Compile Include="Extensions\Extensions.cs" />
-    <Compile Include="File.cs" />
+    <Compile Include="EntryTypes\File.cs" />
     <Compile Include="FileSize.cs" />
-    <Compile Include="Folder.cs" />
+    <Compile Include="EntryTypes\Folder.cs" />
+    <Compile Include="EntryTypes\IFileOrFolder.cs" />
     <Compile Include="PathResolve\ItemList.cs" />
     <Compile Include="MailRuCloud.cs" />
     <Compile Include="Api\CloudApi.cs" />
@@ -96,7 +96,7 @@
     <Compile Include="ShardInfo.cs" />
     <Compile Include="SpecialCommands\SpecialCommandFabric.cs" />
     <Compile Include="SplittedCloud.cs" />
-    <Compile Include="SplittedFile.cs" />
+    <Compile Include="EntryTypes\SplittedFile.cs" />
     <Compile Include="TwoFAHandler.cs" />
     <Compile Include="WebDavPath.cs" />
   </ItemGroup>

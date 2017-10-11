@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using MailRuCloudApi.Api;
 using MailRuCloudApi.Api.Requests.Types;
 using MailRuCloudApi.EntryTypes;
@@ -113,29 +114,30 @@ namespace MailRuCloudApi.Extensions
             if (data.body.kind == "file") return data.ToFile();
 
             // mailru returns parent folder if asked for file path
-            if (data.body.home == linkedToPath)
+            var folder = new Folder(linkedToPath)
             {
-                var folder = new Folder(linkedToPath)
-                {
-                    Files = data.body.list?
-                        .Where(it => it.kind == "file")
-                        .Select(it => it.ToFile()).ToList(),
-                    Folders = data.body.list ?
-                            .Where(it => FolderKinds.Contains(it.kind))
-                            .Select(it => it.ToFolder())
-                            .ToList(),
-                    CreationTimeUtc = DateTime.Now,
-                    LastAccessTimeUtc = DateTime.Now,
-                    LastWriteTimeUtc = DateTime.Now,
-                    Attributes = FileAttributes.Directory
-                };
+                Files = data.body.list?
+                    .Where(it => it.kind == "file")
+                    .Select(it => it.ToFile())
+                    .CombineFileParts()
+                    .ToList(),
+                Folders = data.body.list?
+                    .Where(it => FolderKinds.Contains(it.kind))
+                    .Select(it => it.ToFolder())
+                    .ToList(),
+                CreationTimeUtc = DateTime.Now,
+                LastAccessTimeUtc = DateTime.Now,
+                LastWriteTimeUtc = DateTime.Now,
+                Attributes = FileAttributes.Directory
+            };
+
+            //really folder
+            if (data.body.home == linkedToPath)
                 return folder;
-            }
 
             //file
-            var fa = data.body.list.FirstOrDefault(k => k.home == linkedToPath);
-
-            return fa?.ToFile();
+            var fa = folder.Files.FirstOrDefault(f => f.FullPath == linkedToPath);
+            return fa;
 
             //TODO: don't remember what is this shit about
             //string parentPath = WebDavPath.Parent(path);
@@ -148,6 +150,33 @@ namespace MailRuCloudApi.Extensions
             //        : null;
             //}
         }
+
+        private static IEnumerable<File> CombineFileParts(this IEnumerable<File> files)
+        {
+            var res = files
+                .GroupBy(f => Regex.Match(f.Name, @"(?<name>.*?)(\.wdmrc\.(crc|\d\d\d))?\Z").Groups["name"].Value, file => file)
+                .Select(group => group.Count() == 1
+                    ? group.First()
+                    : new SplittedFile(group.ToList()));
+
+            return res;
+        }
+
+        //private static File ToFile(this FolderInfoResult prop, string filePath)
+        //{
+        //    var file = new File(prop.body.home ?? "/" + prop.body.name, prop.body.size, string.Empty)
+        //    {
+        //        PublicLink = string.IsNullOrEmpty(string.Empty) ? "" : ConstSettings.PublishFileLink + string.Empty,
+        //        PrimaryName = prop.body.name,
+        //        CreationTimeUtc = DateTime.Now, //because mail.ru doesn't send file time in this case
+        //        LastAccessTimeUtc = DateTime.Now,
+        //        LastWriteTimeUtc = DateTime.Now,
+        //    };
+
+        //    var files 
+
+        //    return file;
+        //}
 
 
         private static File ToFile(this FolderInfoResult prop)

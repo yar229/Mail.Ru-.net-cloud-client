@@ -95,7 +95,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShardInfo.cs" />
     <Compile Include="SpecialCommands\SpecialCommandFabric.cs" />
-    <Compile Include="SplittedCloud.cs" />
     <Compile Include="EntryTypes\SplittedFile.cs" />
     <Compile Include="TwoFAHandler.cs" />
     <Compile Include="WebDavPath.cs" />

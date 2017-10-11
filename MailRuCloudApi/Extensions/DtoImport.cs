@@ -109,6 +109,9 @@ namespace MailRuCloudApi.Extensions
                 data.body.home = trimpath;
             }
 
+            // when using ItemInfoRequest instead of FolderInfoRequest here's may be file type
+            if (data.body.kind == "file") return data.ToFile();
+
             // mailru returns parent folder if asked for file path
             if (data.body.home == linkedToPath)
             {
@@ -116,17 +119,10 @@ namespace MailRuCloudApi.Extensions
                 {
                     Files = data.body.list?
                         .Where(it => it.kind == "file")
-                        .Select(it => new File(it.home, it.size, it.hash)
-                        {
-                            PublicLink = string.IsNullOrEmpty(it.weblink) ? "" : ConstSettings.PublishFileLink + it.weblink,
-                            PrimaryName = it.name,
-                            CreationTimeUtc = UnixTimeStampToDateTime(it.mtime),
-                            LastAccessTimeUtc = UnixTimeStampToDateTime(it.mtime),
-                            LastWriteTimeUtc = UnixTimeStampToDateTime(it.mtime),
-                        }).ToList(),
+                        .Select(it => it.ToFile()).ToList(),
                     Folders = data.body.list ?
                             .Where(it => FolderKinds.Contains(it.kind))
-                            .Select(it => new Folder(it.size, it.home, string.IsNullOrEmpty(it.weblink) ? "" : ConstSettings.PublishFileLink + it.weblink))
+                            .Select(it => it.ToFolder())
                             .ToList(),
                     CreationTimeUtc = DateTime.Now,
                     LastAccessTimeUtc = DateTime.Now,
@@ -138,17 +134,8 @@ namespace MailRuCloudApi.Extensions
 
             //file
             var fa = data.body.list.FirstOrDefault(k => k.home == linkedToPath);
-            if (fa != null)
-            {
-                return new File(fa.home, fa.size, fa.hash)
-                {
-                    PublicLink = string.IsNullOrEmpty(fa.weblink) ? "" : ConstSettings.PublishFileLink + fa.weblink,
-                    PrimaryName = fa.name,
-                    CreationTimeUtc = UnixTimeStampToDateTime(fa.mtime),
-                    LastAccessTimeUtc = UnixTimeStampToDateTime(fa.mtime),
-                    LastWriteTimeUtc = UnixTimeStampToDateTime(fa.mtime),
-                };
-            }
+
+            return fa?.ToFile();
 
             //TODO: don't remember what is this shit about
             //string parentPath = WebDavPath.Parent(path);
@@ -160,9 +147,48 @@ namespace MailRuCloudApi.Extensions
             //        ? Task.FromResult<IStoreItem>(new MailruStoreItem(LockingManager, f, IsWritable))
             //        : null;
             //}
-
-            return null;
         }
+
+
+        private static File ToFile(this FolderInfoResult prop)
+        {
+            var file = new File(prop.body.home ?? "/" + prop.body.name, prop.body.size, string.Empty)
+            {
+                PublicLink = string.IsNullOrEmpty(string.Empty) ? "" : ConstSettings.PublishFileLink + string.Empty,
+                PrimaryName = prop.body.name,
+                CreationTimeUtc =  DateTime.Now, //because mail.ru doesn't send file time in this case
+                LastAccessTimeUtc = DateTime.Now,
+                LastWriteTimeUtc = DateTime.Now,
+            };
+
+            return file;
+        }
+
+        
+
+        private static File ToFile(this FolderInfoProps prop)
+        {
+            var file = new File(prop.home, prop.size, prop.hash)
+            {
+                PublicLink = string.IsNullOrEmpty(prop.weblink) ? "" : ConstSettings.PublishFileLink + prop.weblink,
+                PrimaryName = prop.name,
+                CreationTimeUtc = UnixTimeStampToDateTime(prop.mtime),
+                LastAccessTimeUtc = UnixTimeStampToDateTime(prop.mtime),
+                LastWriteTimeUtc = UnixTimeStampToDateTime(prop.mtime),
+            };
+
+            return file;
+        }
+
+        private static Folder ToFolder(this FolderInfoProps prop)
+        {
+            var folder = new Folder(prop.size,
+                prop.home,
+                string.IsNullOrEmpty(prop.weblink) ? "" : ConstSettings.PublishFileLink + prop.weblink);
+            return folder;
+        }
+
+        
 
         private static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {

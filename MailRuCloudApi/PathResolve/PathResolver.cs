@@ -46,7 +46,7 @@ namespace MailRuCloudApi.PathResolve
         public void Load()
         {
             Logger.Log(LogLevel.Info, () => $"Loading links from {LinkContainerName}");
-            var flist = new FolderInfoRequest(_api, WebDavPath.Root).MakeRequestAsync().Result.ToEntry(WebDavPath.Root, string.Empty);
+            var flist = new FolderInfoRequest(_api, WebDavPath.Root).MakeRequestAsync().Result.ToEntry(new Resolved(){Path = WebDavPath.Root});
             var file = (flist as Folder)?.Files.FirstOrDefault(f => f.Name == LinkContainerName);
             if (file != null && file.Size > 3) //some clients put one/two/three-byte file before original file
             {
@@ -105,34 +105,46 @@ namespace MailRuCloudApi.PathResolve
 
         }
 
-        public string AsWebLink(string path)
+
+        public class Resolved
+        {
+            public string RelationalUrl { get; set; } = string.Empty;
+            public string BasePath { get; set; } = string.Empty;
+            public string Path { get; set; } = string.Empty;
+        }
+
+        public Resolved AsWebLink(string path)
         {
             //TODO: subject to refact
             string parent = path;
-            string wp;
+            ItemLink wp;
             string right = string.Empty;
             do
             {
                 string name = WebDavPath.Name(parent);
                 parent = WebDavPath.Parent(parent);
-                wp = _itemList.Items.FirstOrDefault(ip => parent == ip.MapTo && name == ip.Name)?.Href;
-                if (string.IsNullOrEmpty(wp)) right = WebDavPath.Combine(name, right);
-            } while (parent != WebDavPath.Root  && string.IsNullOrEmpty(wp));
-            
-            return string.IsNullOrEmpty(wp)
-                ? string.Empty
-                : wp + right;
+                wp = _itemList.Items.FirstOrDefault(ip => parent == ip.MapTo && name == ip.Name);
+                if (wp != null) right = WebDavPath.Combine(name, right);
+            } while (parent != WebDavPath.Root  && wp == null);
+
+            return new Resolved()
+            {
+                RelationalUrl = wp == null
+                    ? string.Empty
+                    : wp.Href + (wp.IsFile ? string.Empty : right),
+                BasePath = wp?.MapTo ?? string.Empty,
+                Path = path
+            };
         }
 
 
 
-        public string AsRelationalWebLink(string path)
+        public Resolved AsRelationalWebLink(string path)
         {
             //TODO: subject to refact
-            string link = AsWebLink(path);
-            link = GetRelaLink(link);
-
-            return link;
+            var data = AsWebLink(path);
+            data.RelationalUrl = GetRelaLink(data.RelationalUrl);
+            return data;
         }
 
         public void Add(string url, string path, string name, bool isFile, long size, DateTime? creationDate)
@@ -169,5 +181,7 @@ namespace MailRuCloudApi.PathResolve
             if (url.StartsWith(PublicBaseLink1)) return url.Remove(PublicBaseLink1.Length);
             return url;
         }
+
+
     }
 }

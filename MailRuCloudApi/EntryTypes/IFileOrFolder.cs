@@ -8,5 +8,6 @@ namespace MailRuCloudApi.EntryTypes
         FileSize Size { get; }
         string Name { get; }
         DateTime CreationTimeUtc { get;}
+        bool IsLink { get; set; }
     }
 }

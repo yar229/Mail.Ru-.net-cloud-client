@@ -10,7 +10,7 @@ namespace MailRuCloudApi
             b = Clean(b);
             a = a.Trim('/');
             b = b.TrimStart('/');
-            string res = "/" + a + (string.IsNullOrEmpty(b) ? "" : "/" + b);
+            string res = (string.IsNullOrEmpty(a) ? "" : "/") + a + (string.IsNullOrEmpty(b) ? "" : "/" + b);
             return res;
 
         }

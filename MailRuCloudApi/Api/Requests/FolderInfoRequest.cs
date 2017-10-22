@@ -28,5 +28,11 @@ namespace MailRuCloudApi.Api.Requests
                 return uri;
             }
         }
+
+        protected override RequestResponse<FolderInfoResult> DeserializeMessage(string json)
+        {
+            var data =  base.DeserializeMessage(json);
+            return data;
+        }
     }
 }

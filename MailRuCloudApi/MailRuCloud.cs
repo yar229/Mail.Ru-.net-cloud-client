@@ -55,10 +55,13 @@ namespace MailRuCloudApi
         /// <returns>List of the items.</returns>
         public virtual async Task<IFileOrFolder> GetItems(string path)
         {
-            string ulink = _pathResolver.AsRelationalWebLink(path);
+            //string ulink = _pathResolver.AsRelationalWebLink(path);
+            //var z = _pathResolver.Resolve(path);
+            var resolvedPath = _pathResolver.AsRelationalWebLink(path);
 
-            var data = await new FolderInfoRequest(CloudApi, string.IsNullOrEmpty(ulink) ? path : ulink, !string.IsNullOrEmpty(ulink)).MakeRequestAsync();
-            var entry = data.ToEntry(path, ulink);
+            var data = await new FolderInfoRequest(CloudApi, string.IsNullOrEmpty(resolvedPath.RelationalUrl) ? path : resolvedPath.RelationalUrl, 
+                !string.IsNullOrEmpty(resolvedPath.RelationalUrl)).MakeRequestAsync();
+            var entry = data.ToEntry(resolvedPath);
 
             if (entry is Folder folder)
             {
@@ -70,6 +73,7 @@ namespace MailRuCloudApi
                         string linkpath = WebDavPath.Combine(entry.FullPath, flink.Name);
 
                         var item = flink.ToEntry(linkpath);
+                        item.IsLink = true;
                         folder.AddChild(item);
                     }
                 }
@@ -397,9 +401,9 @@ namespace MailRuCloudApi
         private async Task<bool> Remove(string fullPath)
         {
             //TODO: refact
-            string link = _pathResolver.AsRelationalWebLink(fullPath);
+            var link = _pathResolver.AsRelationalWebLink(fullPath);
 
-            if (!string.IsNullOrEmpty(link))
+            if (!string.IsNullOrEmpty(link.RelationalUrl))
             {
                 //if folder is linked - do not delete inner files/folders if client deleting recursively
                 //just try to unlink folder

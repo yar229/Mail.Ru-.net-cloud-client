@@ -38,7 +38,7 @@ namespace MailRuCloudApi.SpecialCommands
         {
             var m = Regex.Match(_param, @"(?snx-)link \s+ (https://?cloud.mail.ru/public)?(?<url>/\w*/\w*)/? \s* (?<name>.*) ");
 
-            var info = new ItemInfoRequest(_cloud.CloudApi, m.Groups["url"].Value, true).MakeRequestAsync().Result.ToEntry("", "");
+            var info = new FolderInfoRequest(_cloud.CloudApi, m.Groups["url"].Value, true).MakeRequestAsync().Result.ToEntry();
 
             bool isFile = info is File;
             long size = info.Size;

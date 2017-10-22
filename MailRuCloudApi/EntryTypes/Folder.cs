@@ -43,6 +43,8 @@ namespace MailRuCloudApi.EntryTypes
             PublicLink = publicLink;
         }
 
+        public bool IsLink { get; set; } = false;
+
         /// <summary>
         /// Gets number of folders in folder.
         /// </summary>

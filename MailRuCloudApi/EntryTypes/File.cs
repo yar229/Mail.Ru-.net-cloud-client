@@ -32,11 +32,13 @@ namespace MailRuCloudApi.EntryTypes
         private FileSize _size;
         private string _hash;
 
+        public bool IsLink { get; set; } = false;
+
         /// <summary>
         /// Gets file name.
         /// </summary>
         /// <value>File name.</value>
-        public virtual string Name => FullPath.Substring(FullPath.LastIndexOf("/", StringComparison.Ordinal) + 1);
+        public virtual string Name => WebDavPath.Name(FullPath); //FullPath.Substring(FullPath.LastIndexOf("/", StringComparison.Ordinal) + 1);
 
         public string Extension => System.IO.Path.GetExtension(Name);
 
@@ -69,8 +71,10 @@ namespace MailRuCloudApi.EntryTypes
             get => _fullPath;
             set
             {
-                _fullPath = value.Replace("\\", "/");
-                if (!string.IsNullOrEmpty(Name) && !_fullPath.EndsWith("/" + Name)) _fullPath = _fullPath.TrimEnd('/') + "/" + Name;
+                //_fullPath = value.Replace("\\", "/");
+                //if (!string.IsNullOrEmpty(Name) && !_fullPath.EndsWith("/" + Name)) _fullPath = _fullPath.TrimEnd('/') + "/" + Name;
+
+                _fullPath = WebDavPath.Clean(value);
             }
         }
 

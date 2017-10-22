@@ -86,6 +86,7 @@ namespace MailRuCloudApi.Extensions
 
         private static readonly string[] FolderKinds = { "folder", "camera-upload", "mounted", "shared" };
 
+
         /// <summary>
         /// 
         /// </summary>
@@ -93,28 +94,28 @@ namespace MailRuCloudApi.Extensions
         /// <param name="linkedToPath">parent path where shared item linked is. Empty if it's not a shared item.</param>
         /// <param name="shareUrl">shared item url. Empty if it's not a shared item.</param>
         /// <returns></returns>
-        public static IFileOrFolder ToEntry(this FolderInfoResult data, string linkedToPath, string shareUrl)
+        public static IFileOrFolder ToEntry(this FolderInfoResult data, PathResolver.Resolved resPath = null)
         {
-
-            if (!string.IsNullOrEmpty(shareUrl))
-            {
-                bool isFile = data.body.list.Any(it => it.weblink.TrimStart('/') == shareUrl.TrimStart('/'));
-
-                string trimpath = linkedToPath;
-                if (isFile) trimpath = WebDavPath.Parent(linkedToPath);
-
-                foreach (var propse in data.body.list)
-                {
-                    propse.home = WebDavPath.Combine(trimpath, propse.name);
-                }
-                data.body.home = trimpath;
-            }
+            string relaPath = resPath.Path.Substring(resPath.BasePath.Length);
 
             // when using ItemInfoRequest instead of FolderInfoRequest here's may be file type
             if (data.body.kind == "file") return data.ToFile();
 
+            string folderpath = data.body.home ?? WebDavPath.Combine(WebDavPath.Root, data.body.name);
+            var isFolder = folderpath.Equals(relaPath, StringComparison.InvariantCultureIgnoreCase);
+
+            if (!string.IsNullOrEmpty(resPath?.RelationalUrl))
+            {
+                data.body.home = resPath.Path; // WebDavPath.Combine(resPath.Path, data.body.home ?? string.Empty);
+                foreach (var propse in data.body?.list)
+                {
+                    propse.home = WebDavPath.Combine(data.body.home, propse.name);
+                }
+
+            }
+
             // mailru returns parent folder if asked for file path
-            var folder = new Folder(linkedToPath)
+            var folder = new Folder(data.body.home)
             {
                 Files = data.body.list?
                     .Where(it => it.kind == "file")
@@ -132,24 +133,82 @@ namespace MailRuCloudApi.Extensions
             };
 
             //really folder
-            if (data.body.home == linkedToPath)
+
+
+            if (isFolder) // resPath?.Path)
                 return folder;
 
             //file
-            var fa = folder.Files.FirstOrDefault(f => f.FullPath == linkedToPath);
+            //var fa = folder.Files.FirstOrDefault(f => f.FullPath == requestedPath);
+            var fa = folder.Files.FirstOrDefault(f => f.FullPath == resPath?.Path);
+            
             return fa;
-
-            //TODO: don't remember what is this shit about
-            //string parentPath = WebDavPath.Parent(path);
-            //item = Cloud.Instance(httpContext).GetItems(parentPath).Result;
-            //if (item != null)
-            //{
-            //    var f = item.Files.FirstOrDefault(k => k.FullPath == path);
-            //    return null != f
-            //        ? Task.FromResult<IStoreItem>(new MailruStoreItem(LockingManager, f, IsWritable))
-            //        : null;
-            //}
         }
+
+
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="data"></param>
+        ///// <param name="linkedToPath">parent path where shared item linked is. Empty if it's not a shared item.</param>
+        ///// <param name="shareUrl">shared item url. Empty if it's not a shared item.</param>
+        ///// <returns></returns>
+        //public static IFileOrFolder ToEntry(this FolderInfoResult data, string linkedToPath = null, string shareUrl = null)
+        //{
+        //    if (data.body.home == null && shareUrl != null)
+        //    {
+        //        bool isFile = data.body.list.Any(it => it.weblink.TrimStart('/') == shareUrl.TrimStart('/'));
+
+        //        string trimpath = WebDavPath.Combine(linkedToPath, data.body.name);
+        //        if (isFile) trimpath = WebDavPath.Parent(linkedToPath);
+
+        //        foreach (var propse in data.body.list)
+        //        {
+        //            propse.home = WebDavPath.Combine(trimpath, propse.name);
+        //        }
+        //        data.body.home = trimpath;
+        //    }
+
+        //    // when using ItemInfoRequest instead of FolderInfoRequest here's may be file type
+        //    if (data.body.kind == "file") return data.ToFile();
+
+        //    // mailru returns parent folder if asked for file path
+        //    var folder = new Folder(data.body.home)
+        //    {
+        //        Files = data.body.list?
+        //            .Where(it => it.kind == "file")
+        //            .Select(it => it.ToFile())
+        //            .CombineFileParts()
+        //            .ToList(),
+        //        Folders = data.body.list?
+        //            .Where(it => FolderKinds.Contains(it.kind))
+        //            .Select(it => it.ToFolder())
+        //            .ToList(),
+        //        CreationTimeUtc = DateTime.Now,
+        //        LastAccessTimeUtc = DateTime.Now,
+        //        LastWriteTimeUtc = DateTime.Now,
+        //        Attributes = FileAttributes.Directory
+        //    };
+
+        //    //really folder
+        //    if (data.body.home == linkedToPath)
+        //        return folder;
+
+        //    //file
+        //    var fa = folder.Files.FirstOrDefault(f => f.FullPath == linkedToPath);
+        //    return fa;
+
+        //    //TODO: don't remember what is this shit about
+        //    //string parentPath = WebDavPath.Parent(path);
+        //    //item = Cloud.Instance(httpContext).GetItems(parentPath).Result;
+        //    //if (item != null)
+        //    //{
+        //    //    var f = item.Files.FirstOrDefault(k => k.FullPath == path);
+        //    //    return null != f
+        //    //        ? Task.FromResult<IStoreItem>(new MailruStoreItem(LockingManager, f, IsWritable))
+        //    //        : null;
+        //    //}
+        //}
 
         private static IEnumerable<File> CombineFileParts(this IEnumerable<File> files)
         {
@@ -181,7 +240,7 @@ namespace MailRuCloudApi.Extensions
 
         private static File ToFile(this FolderInfoResult prop)
         {
-            var file = new File(prop.body.home ?? "/" + prop.body.name, prop.body.size, string.Empty)
+            var file = new File(prop.body.home ?? WebDavPath.Root, prop.body.size, string.Empty)
             {
                 PublicLink = string.IsNullOrEmpty(string.Empty) ? "" : ConstSettings.PublishFileLink + string.Empty,
                 PrimaryName = prop.body.name,
@@ -197,7 +256,9 @@ namespace MailRuCloudApi.Extensions
 
         private static File ToFile(this FolderInfoProps prop)
         {
-            var file = new File(prop.home, prop.size, prop.hash)
+            //var file = new File(WebDavPath.Combine(prop.home ?? WebDavPath.Root, prop.name), prop.size, prop.hash)
+            string path = prop.home ?? WebDavPath.Combine(WebDavPath.Root, prop.name);
+            var file = new File(path, prop.size, prop.hash)
             {
                 PublicLink = string.IsNullOrEmpty(prop.weblink) ? "" : ConstSettings.PublishFileLink + prop.weblink,
                 PrimaryName = prop.name,

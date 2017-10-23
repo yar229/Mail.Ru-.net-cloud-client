@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace MailRuCloudApi
@@ -13,6 +14,7 @@ namespace MailRuCloudApi
     /// <summary>
     /// Server file info.
     /// </summary>
+    [DebuggerDisplay("{" + nameof(FullPath) + "}")]
     public class Folder
     {
         /// <summary>

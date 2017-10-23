@@ -6,12 +6,14 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 
 namespace MailRuCloudApi
 {
     /// <summary>
     /// File size definition.
     /// </summary>
+    [DebuggerDisplay("{" + nameof(DefaultValue) + "}")]
     public struct FileSize : IEquatable<FileSize>
     {
         public FileSize(long defaultValue) : this()

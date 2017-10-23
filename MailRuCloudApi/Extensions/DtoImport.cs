@@ -94,7 +94,6 @@ namespace MailRuCloudApi.Extensions
                         {
                             PublicLink =
                                 string.IsNullOrEmpty(it.weblink) ? "" : ConstSettings.PublishFileLink + it.weblink,
-                            PrimaryName = it.name,
                             CreationTimeUtc = UnixTimeStampToDateTime(it.mtime),
                             LastAccessTimeUtc = UnixTimeStampToDateTime(it.mtime),
                             LastWriteTimeUtc = UnixTimeStampToDateTime(it.mtime),

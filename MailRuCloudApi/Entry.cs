@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 
 namespace MailRuCloudApi
 {
@@ -14,6 +15,7 @@ namespace MailRuCloudApi
     /// <summary>
     /// List of items in cloud.
     /// </summary>
+    [DebuggerDisplay("{" + nameof(FullPath) + "}")]
     public class Entry
     {
         /// <summary>

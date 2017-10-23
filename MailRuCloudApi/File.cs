@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace MailRuCloudApi
@@ -14,6 +15,7 @@ namespace MailRuCloudApi
     /// <summary>
     /// Server file info.
     /// </summary>
+    [DebuggerDisplay("{" + nameof(FullPath) + "}")]
     public class File
     {
         protected File()
@@ -36,6 +38,7 @@ namespace MailRuCloudApi
         /// Gets file name.
         /// </summary>
         /// <value>File name.</value>
+        //TODO: refact
         public virtual string Name => FullPath.Substring(FullPath.LastIndexOf("/", StringComparison.Ordinal) + 1);
 
         public string Extension => System.IO.Path.GetExtension(Name);
@@ -83,11 +86,6 @@ namespace MailRuCloudApi
         public string PublicLink { get; internal set; }
 
         public virtual List<File> Files => new List<File> {this};
-
-        /// <summary>
-        /// Gets or sets base file name.
-        /// </summary>
-        internal string PrimaryName { get; set; }
 
         /// <summary>
         /// Gets or sets base file size.
